@@ -228,12 +228,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val calendarYearMonth: StateFlow<YearMonth> = _calendarYearMonth.asStateFlow()
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    val selectedDaySummary: StateFlow<UnifiedDailySummary?> = _selectedDate.flatMapLatest { date ->
+    val selectedDaySummary: StateFlow<UnifiedDailySummary?> = combine(_selectedDate, activeUserId) { date, uid ->
+        Pair(date, uid)
+    }.flatMapLatest { (date, _) ->
         repository.getUnifiedDailySummary(date)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    val todayHabitsWithStatus: StateFlow<List<HabitWithStatus>> = currentDate.flatMapLatest { today ->
+    val todayHabitsWithStatus: StateFlow<List<HabitWithStatus>> = combine(currentDate, activeUserId) { today, uid ->
+        Pair(today, uid)
+    }.flatMapLatest { (today, _) ->
         repository.getUnifiedDailySummary(today).map { it.habits }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -386,11 +390,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Synchronize canonical achievements whenever active user is loaded/changed
+        // Synchronize canonical achievements and starter habits whenever active user is loaded/changed
         viewModelScope.launch {
             repository.activeUserId.collectLatest { uid ->
                 if (uid != null) {
                     repository.syncCanonicalAchievements(uid)
+                    repository.seedStarterHabits(uid)
+                    refreshCalendarAndAnalytics()
                 }
             }
         }

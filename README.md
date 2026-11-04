@@ -162,7 +162,7 @@ The Android application is distributed through GitHub Releases.
 - **Minimum Android Version:** Android 8.0 Oreo (API 26)
 - **Package Size:** Approximately 4.50 MB (4,723,326 bytes)
 - **Signing Scheme:** Privately release-signed APK (v2 signature scheme verified).
-- **SHA-256:** `30efa18ce0c5d4112d1eb79e7c990d7cf30764222fd8bc98ad2fb87d9183ec26`
+- **SHA-256:** `f58b8a57514facff3f97bb7809f099cd4cba8c45032ea4049bb421bc6c552783`
 
 #### What's New in v1.0.1
 - **Account Deletion:** Added permanent "Delete Account" option in Settings with atomic on-device database wipe.

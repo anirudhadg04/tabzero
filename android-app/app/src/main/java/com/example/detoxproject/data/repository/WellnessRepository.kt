@@ -50,6 +50,7 @@ class WellnessRepository(
             undoRedoManager.updateUserId(initialId)
             CoroutineScope(Dispatchers.IO).launch {
                 syncCanonicalAchievements(initialId)
+                OfflineDatabase.seedStarterHabits(database, initialId)
             }
         }
     }
@@ -138,6 +139,10 @@ class WellnessRepository(
     }
 
     private fun getCurrentUserId(): Long = _activeUserId.value ?: 1L
+
+    suspend fun seedStarterHabits(userId: Long) {
+        OfflineDatabase.seedStarterHabits(database, userId)
+    }
 
     suspend fun syncCanonicalAchievements(userId: Long) {
         val existingList = database.achievementDao().getAllAchievementsDirect(userId)
@@ -277,6 +282,7 @@ class WellnessRepository(
         _activeUserId.value = user.id
         undoRedoManager.updateUserId(user.id)
         syncCanonicalAchievements(user.id)
+        OfflineDatabase.seedStarterHabits(database, user.id)
 
         return Result.success(user)
     }
@@ -904,8 +910,9 @@ class WellnessRepository(
 
     // --- UNIFIED DAILY SUMMARY ---
 
-    fun getUnifiedDailySummary(date: LocalDate): Flow<UnifiedDailySummary> {
-        val uid = getCurrentUserId()
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun getUnifiedDailySummary(date: LocalDate): Flow<UnifiedDailySummary> = _activeUserId.flatMapLatest { maybeUid ->
+        val uid = maybeUid ?: authSession.getActiveUserId() ?: 1L
         val dateIso = date.format(DateManager.ISO_FORMATTER)
         val today = LocalDate.now()
 
@@ -932,7 +939,7 @@ class WellnessRepository(
             Pair(transactions, goals)
         }
 
-        return combine(habitsFlow, activityFlow, xpAndGoalsFlow) { (habits, dayCompletions, tasks), (dailyAct, allDetoxSessions, exercises), (transactions, goals) ->
+        combine(habitsFlow, activityFlow, xpAndGoalsFlow) { (habits, dayCompletions, tasks), (dailyAct, allDetoxSessions, exercises), (transactions, goals) ->
             val completedHabitIds = dayCompletions.map { it.habitId }.toSet()
             val allCompletions = database.habitDao().getAllCompletionsDirect()
 

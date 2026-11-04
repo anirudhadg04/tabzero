@@ -11,7 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.DirectionsRun
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -475,37 +475,71 @@ private fun HabitTrendCard(habits: HabitTrendAnalytics) {
             }
 
             if (habits.topConsistentHabits.isNotEmpty()) {
+                var showConsistentHabits by remember { mutableStateOf(false) }
                 Spacer(modifier = Modifier.height(14.dp))
-                Text(
-                    text = "Most Consistent Habits",
-                    style = Typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = OfflineTextSecondary
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    habits.topConsistentHabits.forEach { (title, count) ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Most Consistent Habits",
+                        style = Typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = OfflineTextSecondary
+                    )
+                    Surface(
+                        onClick = { showConsistentHabits = !showConsistentHabits },
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (showConsistentHabits) OfflineSurfaceVariant else Color.Transparent,
+                        border = BorderStroke(1.dp, if (showConsistentHabits) OfflineAccentPrimary else OfflineBorder)
+                    ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(OfflineSurfaceVariant.copy(alpha = 0.5f))
-                                .padding(horizontal = 10.dp, vertical = 6.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Text(
-                                text = title,
-                                style = Typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                                color = OfflineTextPrimary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
+                            Icon(
+                                imageVector = if (showConsistentHabits) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                tint = if (showConsistentHabits) OfflineAccentPrimary else OfflineTextPrimary,
+                                modifier = Modifier.size(14.dp)
                             )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "$count completions",
+                                text = if (showConsistentHabits) "Hide" else "View",
                                 style = Typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = Color(0xFFEA580C)
+                                color = if (showConsistentHabits) OfflineAccentPrimary else OfflineTextPrimary
                             )
+                        }
+                    }
+                }
+
+                if (showConsistentHabits) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        habits.topConsistentHabits.forEach { (title, count) ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(OfflineSurfaceVariant.copy(alpha = 0.5f))
+                                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = title,
+                                    style = Typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                                    color = OfflineTextPrimary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Text(
+                                    text = "$count completions",
+                                    style = Typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = Color(0xFFEA580C)
+                                )
+                            }
                         }
                     }
                 }
