@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude local database and sensitive auth state from legacy cloud backups -->
+    <exclude domain="database" path="offline_detox.db" />
+    <exclude domain="database" path="offline_detox.db-wal" />
+    <exclude domain="database" path="offline_detox.db-shm" />
+    <exclude domain="sharedpref" path="tabzero_auth_prefs.xml" />
+</full-backup-content>

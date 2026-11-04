@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Exclude database and sensitive preferences from unencrypted cloud backup -->
+        <exclude domain="database" path="offline_detox.db" />
+        <exclude domain="database" path="offline_detox.db-wal" />
+        <exclude domain="database" path="offline_detox.db-shm" />
+        <exclude domain="sharedpref" path="tabzero_auth_prefs.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <!-- Allow secure local device migration during phone upgrade -->
+        <include domain="database" path="." />
+        <include domain="sharedpref" path="." />
+    </device-transfer>
+</data-extraction-rules>
