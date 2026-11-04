@@ -15,11 +15,11 @@ The project consists of two independently developed components:
 
 The Android application is built with Kotlin and Jetpack Compose.
 
-Core themes:
+Core focus areas:
 
-- **MOVE** — step tracking, fitness-related activity, and movement goals.
-- **DISCONNECT** — focus timers, detox sessions, and distraction pledges.
-- **RECONNECT** — habits, reflections, streaks, and outdoor activity suggestions.
+- **Movement & Daily Vitality** — step tracking, physical activity goals, and outdoor walks.
+- **Intentional Focus** — distraction-free sessions, quiet countdowns, and self-defined pledges.
+- **Mindful Presence** — personal habit streaks, daily reflections, and weather-aware offline activities.
 
 Key capabilities include:
 
@@ -144,6 +144,11 @@ Release assets are separate from the source code so generated binaries do not in
 - Keep machine-specific configuration and build outputs out of version control.
 - Review permissions and network integrations before distributing builds.
 
-## Project Goal
+## 🌿 The tabzero. Philosophy
 
-tabzero. aims to make digital wellbeing practical by combining browser-level distraction management with a native mobile application for focus, movement, and healthy routines.
+Technology should serve human intention, not exploit human attention. **tabzero.** bridges desktop browsing and mobile living with a shared philosophy rooted in calm, autonomy, and real-world presence:
+
+- **Quiet Friction, Never Punishment:** We reject hostile lockers and punitive alarms. When compulsive habits kick in, tabzero replaces infinite scrolling and infinite tabs with peaceful nature sanctuaries—inviting you to pause, breathe, and step away on your own terms.
+- **Autonomy Over Algorithms:** No rigid categories, arbitrary quotas, or pre-baked schedules. Your offline time and pledges are entirely user-defined, dynamic, and flexible, supported by persistent 5-step undo/redo so you remain in complete control.
+- **Rooted in the Physical World:** Traditional wellness trackers often keep you staring at screens analyzing screen time charts. tabzero connects with live weather intelligence to offer context-aware nudges—reminding you to walk under open skies when it's bright or enjoy mindful indoor focus when it rains.
+- **Local-First & Uncompromised Privacy:** Your focus, screen time, and habits are sacred personal data. Both the browser extension and mobile application operate entirely on-device—no cloud lock-in, no telemetry, and no surveillance.
