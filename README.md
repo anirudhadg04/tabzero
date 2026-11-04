@@ -128,14 +128,30 @@ Both branches share this repository's combined project overview. The Android app
 
 ## Releases
 
-Android testing APK builds are distributed through [GitHub Releases](https://github.com/anirudhadg04/tabzero/releases).
+The Android application is distributed through GitHub Releases.
 
-Release assets are separate from the source code so generated binaries do not increase repository history.
+- **Latest Release:** [v1.0.0](https://github.com/anirudhadg04/tabzero/releases/tag/v1.0.0)
+- **Download:** [tabzero-v1.0.0.apk](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.0/tabzero-v1.0.0.apk)
+- **Version:** 1.0.0
+- **APK Size:** Approximately 4.03 MB
+- **Minimum Android Version:** Android 8.0 (API 26)
+- **Signing:** Privately release-signed APK.
+- **SHA-256:** `e0f13064bdb9d2bdaccef2c0e3f07435171e86a9d8cbfd1ed529f4e8c205f7b3`
 
-- **Current Testing Release:** `v1.0.0`
-- **Release Asset:** `tabzero-v1.0.0.apk`
-- **Asset SHA-256:** `f619168ba25cefb186deb2536e125e67aa3749a07a5da50ae1861699a2b1a637`
-- **Note:** This is a debug-signed Android testing build intended for evaluation and testing, not a production Google Play Store release.
+### Installing on Android
+
+1. Open the APK download link above on your Android device.
+2. Download `tabzero-v1.0.0.apk`.
+3. Open the downloaded APK.
+4. If prompted, allow your browser or file manager to install unknown apps from that source.
+5. Return to the APK installer and tap **Install**.
+6. Open **tabzero.** after installation.
+
+> **Note:** Android may display a security warning because the APK is distributed outside the Google Play Store. Only download the APK from the official GitHub release.
+>
+> If an older debug-signed version of tabzero. is installed, Android may reject the release APK as an update because its signing certificate differs. Uninstalling the old version first may be necessary, and this can delete its local app data.
+>
+> For future updates, download the newer APK from the official GitHub Releases page.
 
 ## Privacy and Security
 
