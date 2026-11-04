@@ -259,6 +259,7 @@ fun DayDetailHistoryCard(
     selectedDate: LocalDate,
     onStepDate: (offsetDays: Long) -> Unit,
     onToggleHabit: (habitId: Long) -> Unit,
+    onDeleteHabit: (Long) -> Unit = {},
     onToggleTask: (taskId: Long) -> Unit,
     onDeleteTask: (taskId: Long) -> Unit,
     onAddTaskClick: () -> Unit
@@ -375,7 +376,7 @@ fun DayDetailHistoryCard(
             // --- MOVEMENT & PHYSICAL ACTIVITY SECTION ---
             val stepsRecorded = summary.dailyActivity?.steps ?: 0
             val distanceKm = (summary.dailyActivity?.distanceMeters ?: 0f) / 1000f
-            val caloriesBurned = summary.dailyActivity?.activeCalories ?: (stepsRecorded * 0.04f)
+            val caloriesBurned = stepsRecorded * 0.04f
             val stepGoal = summary.stepGoalTarget.coerceAtLeast(1)
             val stepFraction = (stepsRecorded.toFloat() / stepGoal.toFloat()).coerceIn(0f, 1f)
             val isGoalMet = stepsRecorded >= stepGoal
@@ -586,7 +587,11 @@ fun DayDetailHistoryCard(
                                     }
                                 }
 
-                                if (habitStatus.stats.currentStreak > 0) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    if (habitStatus.stats.currentStreak > 0) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(2.dp)
@@ -601,6 +606,19 @@ fun DayDetailHistoryCard(
                                             text = "${habitStatus.stats.currentStreak}d",
                                             style = Typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                             color = Color(0xFFEA580C)
+                                        )
+                                    }
+                                }
+
+                                    IconButton(
+                                        onClick = { onDeleteHabit(habitStatus.habit.id) },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Delete habit",
+                                            tint = Color(0xFFEF4444),
+                                            modifier = Modifier.size(18.dp)
                                         )
                                     }
                                 }

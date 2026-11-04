@@ -1,6 +1,7 @@
 package com.example.detoxproject.data.integrations.health
 
 import android.Manifest
+import android.os.Build
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Sensor
@@ -42,10 +43,14 @@ class StepSensorHelper(private val context: Context) : SensorEventListener {
     fun hasHardwareSensor(): Boolean = stepSensor != null
 
     fun hasPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACTIVITY_RECOGNITION
-        ) == PackageManager.PERMISSION_GRANTED
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACTIVITY_RECOGNITION
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
     }
 
     fun startListening() {

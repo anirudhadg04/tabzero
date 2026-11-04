@@ -72,6 +72,7 @@ fun ProgressScreen(
     onGoToToday: () -> Unit = {},
     onStepDate: (Long) -> Unit = {},
     onToggleHabitForDate: (habitId: Long, date: LocalDate) -> Unit = { _, _ -> },
+    onDeleteHabit: ((Long) -> Unit)? = null,
     onToggleTask: (taskId: Long) -> Unit = {},
     onDeleteTask: (taskId: Long) -> Unit = {},
     onAddTask: (title: String, duration: Int, category: String, description: String, date: LocalDate) -> Unit = { _, _, _, _, _ -> },
@@ -270,6 +271,7 @@ fun ProgressScreen(
                     selectedDate = selectedDate,
                     onStepDate = onStepDate,
                     onToggleHabit = { habitId -> onToggleHabitForDate(habitId, selectedDate) },
+                    onDeleteHabit = { onDeleteHabit?.invoke(it) },
                     onToggleTask = onToggleTask,
                     onDeleteTask = onDeleteTask,
                     onAddTaskClick = { showAddTaskDialog = true }

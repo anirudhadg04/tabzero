@@ -1491,6 +1491,27 @@ class WellnessRepository(
         undoRedoManager.recalculateAggregates()
     }
 
+    suspend fun deleteCurrentAccount(): Boolean = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        val uid = _activeUserId.value ?: return@withContext false
+        database.withTransaction {
+            val db = database.openHelper.writableDatabase
+            db.execSQL("DELETE FROM users WHERE id = $uid")
+            db.execSQL("DELETE FROM user_goals WHERE userId = $uid")
+            db.execSQL("DELETE FROM detox_sessions WHERE userId = $uid")
+            db.execSQL("DELETE FROM pledges WHERE userId = $uid")
+            db.execSQL("DELETE FROM planned_activities WHERE userId = $uid")
+            db.execSQL("DELETE FROM achievements WHERE userId = $uid")
+            db.execSQL("DELETE FROM habits WHERE userId = $uid")
+            db.execSQL("DELETE FROM action_history WHERE userId = $uid")
+            db.execSQL("DELETE FROM xp_transactions WHERE userId = $uid")
+            db.execSQL("DELETE FROM grace_days WHERE userId = $uid")
+            db.execSQL("DELETE FROM mindful_notes")
+        }
+        authSession.clearSession()
+        _activeUserId.value = null
+        true
+    }
+
     companion object {
         @Volatile
         private var INSTANCE: WellnessRepository? = null

@@ -158,6 +158,7 @@ class MainActivity : ComponentActivity() {
                     },
                     onUpdateAvatar = { viewModel.updateAvatar(it) },
                     onLogout = { viewModel.logout() },
+                    onDeleteAccount = { viewModel.deleteAccount() },
                     onUndo = { viewModel.undo() },
                     onRedo = { viewModel.redo() },
                     onToggleQuickDetox = { viewModel.toggleQuickDetox() },
@@ -215,6 +216,7 @@ class MainActivity : ComponentActivity() {
                     onGoToToday = { viewModel.goToToday() },
                     onStepDate = { offset -> viewModel.selectDate(selectedDate.plusDays(offset)) },
                     onToggleHabitForDate = { id, date -> viewModel.toggleHabitForDate(id, date) },
+                    onDeleteHabit = { viewModel.deleteHabit(it) },
                     onToggleTask = { viewModel.togglePlannedActivity(it) },
                     onDeleteTask = { viewModel.deleteTask(it) },
                     onAddTask = { title, duration, cat, desc, date ->
@@ -240,6 +242,7 @@ class MainActivity : ComponentActivity() {
                     mindfulNotes = mindfulNotes,
                     onSaveMindfulNote = { title, content, color -> viewModel.saveMindfulNote(title, content, color) },
                     onDeleteMindfulNote = { viewModel.deleteMindfulNote(it) },
+                    onUpdateMindfulNote = { id, title, content, color -> viewModel.updateMindfulNote(id, title, content, color) },
                     onRecordWorkout = { title, type, duration, date, intensity, notes ->
                         viewModel.recordCompletedWorkout(title, type, duration, date, intensity, notes)
                     }

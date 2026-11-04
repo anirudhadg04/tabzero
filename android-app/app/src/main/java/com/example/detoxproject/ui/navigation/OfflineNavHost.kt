@@ -130,7 +130,10 @@ fun OfflineNavHost(
     onRecordWorkout: ((title: String, type: String, durationMinutes: Int, date: LocalDate, intensity: String?, notes: String?) -> Unit)? = null,
     mindfulNotes: List<com.example.detoxproject.data.local.entity.MindfulNoteEntity> = emptyList(),
     onSaveMindfulNote: ((title: String, content: String, colorHex: String) -> Unit)? = null,
-    onDeleteMindfulNote: ((Long) -> Unit)? = null
+    onDeleteMindfulNote: ((Long) -> Unit)? = null,
+    onDeleteHabit: ((Long) -> Unit)? = null,
+    onUpdateMindfulNote: ((Long, String, String, String) -> Unit)? = null,
+    onDeleteAccount: (() -> Unit)? = null
 ) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
     var pendingFocusCategory by remember { mutableStateOf("focus") }
@@ -231,6 +234,7 @@ fun OfflineNavHost(
                     todayHabits = todayHabits,
                     onToggleHabit = { id -> onToggleHabitForDate(id, selectedDate) },
                     onCreateHabit = onCreateHabit,
+                    onDeleteHabit = { onDeleteHabit?.invoke(it) },
                     onAddTask = { title, duration, cat, desc -> onAddTask(title, duration, cat, desc, selectedDate) },
                     onToggleActivity = onToggleActivity,
                     onDeleteTask = onDeleteTask,
@@ -305,7 +309,8 @@ fun OfflineNavHost(
                     onRefreshWeather = onRefreshWeather,
                     onAddActivityToPlanner = onAddActivityToPlanner,
                     onSaveNote = { title, content, color -> onSaveMindfulNote?.invoke(title, content, color) },
-                    onDeleteNote = { id -> onDeleteMindfulNote?.invoke(id) }
+                    onDeleteNote = { id -> onDeleteMindfulNote?.invoke(id) },
+                    onUpdateNote = { id, title, content, color -> onUpdateMindfulNote?.invoke(id, title, content, color) }
                 )
 
                 Screen.Progress -> ProgressScreen(
@@ -341,6 +346,7 @@ fun OfflineNavHost(
                     onDeleteTask = onDeleteTask,
                     onAddTask = onAddTask,
                     onCreateHabit = onCreateHabit,
+                    onDeleteHabit = { onDeleteHabit?.invoke(it) },
                     recentExercises = recentExercises,
                     onRecordWorkout = onRecordWorkout,
                     onStartDetox = { currentScreen = Screen.Focus },
@@ -367,7 +373,8 @@ fun OfflineNavHost(
                     quickDetoxPackages = quickDetoxPackages,
                     onUpdateQuickDetoxPackages = onUpdateQuickDetoxPackages,
                     quickDetoxDurationSeconds = quickDetoxDurationSeconds,
-                    onUpdateQuickDetoxDuration = onUpdateQuickDetoxDurationSeconds
+                    onUpdateQuickDetoxDuration = onUpdateQuickDetoxDurationSeconds,
+                    onDeleteAccount = { onDeleteAccount?.invoke() }
                 )
 
                 else -> HomeScreen(

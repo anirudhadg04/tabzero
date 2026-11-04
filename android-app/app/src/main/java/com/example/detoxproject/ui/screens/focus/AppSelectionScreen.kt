@@ -46,7 +46,6 @@ fun AppSelectionScreen(
 ) {
     val context = LocalContext.current
     val pm = context.packageManager
-    var searchQuery by remember { mutableStateOf("") }
     var allowAudio by remember { mutableStateOf(true) }
     var showAppPickerDialog by remember { mutableStateOf(false) }
     var showSelectedAppsGrid by remember { mutableStateOf(false) }
@@ -78,11 +77,11 @@ fun AppSelectionScreen(
     }
 
     // The Page Card displays ONLY the currently selected apps instead of hardcoded predefined ones
-    val selectedApps = remember(selectedPackages.toList(), installedApps, searchQuery) {
+    val selectedApps = remember(selectedPackages.toList(), installedApps) {
         selectedPackages.mapNotNull { pkg ->
             installedApps.find { it.packageName == pkg }
                 ?: AppChoice(packageName = pkg, name = pkg.substringAfterLast("."), iconEmoji = "📱")
-        }.filter { it.name.contains(searchQuery, ignoreCase = true) }
+        }
     }
 
     // Installed app picker bottom sheet
@@ -144,40 +143,6 @@ fun AppSelectionScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Interactive Search Bar
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            placeholder = { Text("Search selected apps...", color = OfflineTextMuted) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = OfflineSurfaceVariant,
-                unfocusedContainerColor = OfflineSurfaceVariant,
-                focusedBorderColor = OfflineAccentPrimary,
-                unfocusedBorderColor = Color.Transparent,
-                focusedTextColor = OfflineTextPrimary,
-                unfocusedTextColor = OfflineTextPrimary
-            ),
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = OfflineTextSecondary,
-                    modifier = Modifier.size(18.dp)
-                )
-            },
-            trailingIcon = {
-                if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { searchQuery = "" }) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Clear", tint = OfflineTextSecondary)
-                    }
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
 
         // Summary row showing how many apps selected + [view] button
         Card(
@@ -246,7 +211,7 @@ fun AppSelectionScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "+ Add / Manage Apps",
+                            text = "Add / Manage Apps",
                             style = Typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                             color = OfflineOnDarkButton
                         )
@@ -297,8 +262,7 @@ fun AppSelectionScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = if (searchQuery.isNotEmpty()) "No selected apps match '$searchQuery'"
-                                else "No apps limited yet. Tap '+ Add App' to pick apps you want restricted.",
+                                text = "No apps limited yet. Tap '+ Add App' to pick apps you want restricted.",
                                 style = Typography.bodySmall,
                                 color = OfflineTextSecondary,
                                 modifier = Modifier.padding(14.dp)

@@ -172,11 +172,7 @@ class FitnessRepository(
         }
 
         val existingCalories = existing?.activeCalories ?: 0f
-        val activeCalories = if (hcCaloriesKcal > 0.0) {
-            maxOf(hcCaloriesKcal.toFloat(), existingCalories, bestSteps * 0.04f)
-        } else {
-            maxOf(existingCalories, bestSteps * 0.04f)
-        }
+        val activeCalories = bestSteps * 0.04f
 
         val source = when {
             hasHealthConnectData && hcSteps >= sensorSteps && hcSteps > 0 -> "HEALTH_CONNECT"
@@ -215,7 +211,7 @@ class FitnessRepository(
         if (steps >= existingSteps) {
             val cachedHcCalories = _externalMetrics.value.todayActiveCaloriesKcal ?: 0f
             if (existing == null) {
-                val initCalories = maxOf(steps * 0.04f, cachedHcCalories)
+                val initCalories = steps * 0.04f
                 dailyActivityDao.insertOrUpdate(
                     DailyActivityEntity(
                         date = todayStr,
@@ -228,7 +224,7 @@ class FitnessRepository(
                     )
                 )
             } else {
-                val calories = maxOf(existing.activeCalories, steps * 0.04f, cachedHcCalories)
+                val calories = steps * 0.04f
                 dailyActivityDao.updateSteps(
                     date = todayStr,
                     steps = steps,

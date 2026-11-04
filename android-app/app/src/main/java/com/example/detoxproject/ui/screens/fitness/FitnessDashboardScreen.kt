@@ -86,11 +86,7 @@ fun FitnessDashboardScreen(
     val todaySteps = todayActivity?.steps ?: 0
     val goalSteps = todayActivity?.goalSteps ?: userGoals?.dailySteps ?: 8000
     val distanceKm = (todayActivity?.distanceMeters ?: 0f) / 1000f
-    val activeCalories = maxOf(
-        externalMetrics.todayActiveCaloriesKcal ?: 0f,
-        todayActivity?.activeCalories ?: 0f,
-        todaySteps * 0.04f
-    )
+    val activeCalories = todaySteps * 0.04f
     val activeMinutes = todayActivity?.activeMinutes ?: 0
     val stepProgress = if (goalSteps > 0) (todaySteps.toFloat() / goalSteps).coerceIn(0f, 1f) else 0f
     val progressPercent = (stepProgress * 100).toInt()
@@ -934,19 +930,7 @@ fun FitnessDashboardScreen(
                 val selectedActivity = daysMap[selectedDateStr]
                 val selectedSteps = if (selectedDayOffset == 0) todaySteps else (selectedActivity?.steps ?: 0)
 
-                val selectedCalories = if (selectedDayOffset == 0) {
-                    maxOf(
-                        externalMetrics.todayActiveCaloriesKcal ?: 0f,
-                        todayActivity?.activeCalories ?: 0f,
-                        todaySteps * 0.04f
-                    )
-                } else {
-                    if (selectedActivity != null && selectedActivity.activeCalories > 0f) {
-                        selectedActivity.activeCalories
-                    } else {
-                        selectedSteps * 0.04f
-                    }
-                }
+                val selectedCalories = selectedSteps * 0.04f
 
                 val selectedSleepMinutes = if (selectedDayOffset == 0) {
                     externalMetrics.lastSleepDurationMinutes ?: dailyUsage?.lastNightRestMinutes

@@ -158,6 +158,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateMindfulNote(id: Long, title: String, content: String, colorHex: String) {
+        viewModelScope.launch {
+            repository.updateMindfulNote(id, title, content, colorHex)
+            refreshProgression()
+        }
+    }
+
     fun deleteMindfulNote(id: Long) {
         viewModelScope.launch {
             repository.deleteMindfulNote(id)
@@ -610,6 +617,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun logout() {
         repository.logout()
         _userMessage.value = "Logged out"
+    }
+
+    fun deleteAccount(onComplete: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            val success = repository.deleteCurrentAccount()
+            if (success) {
+                _userMessage.value = "Account deleted"
+            }
+            onComplete(success)
+        }
     }
 
     fun resetPassword(email: String, newPass: String, onComplete: (Boolean, String) -> Unit) {

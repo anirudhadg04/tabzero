@@ -18,9 +18,9 @@ android {
     defaultConfig {
         applicationId = "com.example.detoxproject"
         minSdk = 26
-        targetSdk = 37
-        versionCode = 1
-        versionName = "1.0.0"
+        targetSdk = 35
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -70,9 +70,13 @@ android {
                     )
                 }
             }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
+                packageScope = setOf("com.example.detoxproject.**", "androidx.**", "kotlin.**", "kotlinx.**")
             }
         }
     }

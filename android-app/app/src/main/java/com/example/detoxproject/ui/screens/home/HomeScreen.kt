@@ -55,6 +55,7 @@ fun HomeScreen(
     plannedActivities: List<PlannedActivityEntity> = emptyList(),
     todayHabits: List<HabitWithStatus> = emptyList(),
     onToggleHabit: (Long) -> Unit = {},
+    onDeleteHabit: (Long) -> Unit = {},
     onCreateHabit: ((String, String, String, String, String, String) -> Unit)? = null,
     onAddTask: ((String, Int, String, String) -> Unit)? = null,
     onToggleActivity: (Long) -> Unit = {},
@@ -431,12 +432,7 @@ fun HomeScreen(
                         val steps = todayActivity?.steps ?: 0
                         val goal = todayActivity?.goalSteps ?: userGoals?.dailySteps ?: 8000
                         val distanceKm = (todayActivity?.distanceMeters ?: 0f) / 1000f
-                        val calories = maxOf(
-                            externalMetrics?.todayActiveCaloriesKcal ?: 0f,
-                            todayActivity?.activeCalories ?: 0f,
-                            activitySummary?.activeCaloriesKcal ?: 0f,
-                            steps * 0.04f
-                        )
+                        val calories = steps * 0.04f
 
                         Text(
                             text = "%,d".format(steps),
@@ -645,16 +641,33 @@ fun HomeScreen(
                                 }
                             }
 
-                            if (habitStatus.stats.currentStreak > 0) {
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = Color(0xFFFEF3C7)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                if (habitStatus.stats.currentStreak > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = Color(0xFFFEF3C7)
+                                    ) {
+                                        Text(
+                                            text = "🔥 ${habitStatus.stats.currentStreak}d",
+                                            style = Typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                            color = Color(0xFFB45309),
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                }
+
+                                IconButton(
+                                    onClick = { onDeleteHabit(habitStatus.habit.id) },
+                                    modifier = Modifier.size(32.dp)
                                 ) {
-                                    Text(
-                                        text = "🔥 ${habitStatus.stats.currentStreak}d",
-                                        style = Typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = Color(0xFFB45309),
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete habit",
+                                        tint = Color(0xFFEF4444),
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }

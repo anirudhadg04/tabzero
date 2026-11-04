@@ -126,32 +126,66 @@ The compiled extension is generated inside `dist/`. Load it unpacked via `chrome
 
 Both branches share this repository's combined project overview. The Android application is maintained in its own directory on the `android-app` branch.
 
+## System Requirements & Device Compatibility
+
+For full technical specifications, OEM setup guides, and permission fallback behavior, see [`android-app/docs/SYSTEM_REQUIREMENTS_AND_COMPATIBILITY.md`](android-app/docs/SYSTEM_REQUIREMENTS_AND_COMPATIBILITY.md).
+
+| Requirement | Minimum version / condition | Purpose | Mandatory? |
+|---|---|---|---|
+| **Android OS** | Android 8.0 Oreo (API 26) | Run tabzero runtime and user interface | **Yes** |
+| **Digital Wellbeing** | AOSP standard (independent) | App usage analytics and mindful focus limits | **No** (Does not require Google's Digital Wellbeing app; compatible with de-Googled ROMs) |
+| **Usage Access** | Android 8.0+ (`PACKAGE_USAGE_STATS`) | Per-app screen time tracking and app blocking | **Feature-dependent** (Usage stats & app limits) |
+| **Health Connect** | Android 14+ (System) / Android 9–13 (Standalone APK) | Health & sleep data synchronization | **Optional** (Falls back to hardware step sensor & local rest tracking) |
+| **Bedtime Mode** | Android system feature | Bedtime routines; tabzero operates independently | **No** (Independent on-device rest calculations) |
+| **Notifications** | Android 13+ (`POST_NOTIFICATIONS`) | Focus timer countdowns and completion alerts | **Feature-dependent** (Timer alerts) |
+| **Exact Alarms** | Android 12+ (`SCHEDULE_EXACT_ALARM`) | High-precision detox session completion alarms | **Feature-dependent** (Precision timers) |
+| **Physical Activity** | Android 10+ (`ACTIVITY_RECOGNITION`) | Hardware step detector (`Sensor.TYPE_STEP_COUNTER`) | **Feature-dependent** (Step tracking) |
+| **Battery Optimization** | Set to **Unrestricted** | Prevents OEM background process killing | **Recommended** (Background reliability) |
+| **Internet** | Active network connection | Live weather data via Open-Meteo REST API | **Optional** (All offline features remain 100% operational) |
+
+### Key System Characteristics
+- **Native Architectures:** Universal multi-ABI package supporting `arm64-v8a`, `armeabi-v7a`, `x86_64`, `x86`.
+- **Target & Compile SDK:** Android 15 (API 35).
+- **Offline-First:** All user accounts, habits, notes, sessions, and streaks persist entirely on-device via Room SQLite.
+- **OEM Battery Optimization:** Device manufacturers (Xiaomi, Samsung, OnePlus, Pixel) require setting battery usage to **Unrestricted** to prevent the OS from killing background step sensors and detox timers.
+
 ## Releases
 
 The Android application is distributed through GitHub Releases.
 
-- **Latest Release:** [v1.0.0](https://github.com/anirudhadg04/tabzero/releases/tag/v1.0.0)
-- **Download:** [tabzero-v1.0.0.apk](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.0/tabzero-v1.0.0.apk)
-- **Version:** 1.0.0
-- **APK Size:** Approximately 4.03 MB
-- **Minimum Android Version:** Android 8.0 (API 26)
-- **Signing:** Privately release-signed APK.
-- **SHA-256:** `e0f13064bdb9d2bdaccef2c0e3f07435171e86a9d8cbfd1ed529f4e8c205f7b3`
+### Latest Release: v1.0.1
 
-### Installing on Android
+- **Release Tag:** [v1.0.1](https://github.com/anirudhadg04/tabzero/releases/tag/v1.0.1)
+- **Direct Download:** [tabzero-v1.0.1.apk](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.1/tabzero-v1.0.1.apk)
+- **Version:** 1.0.1
+- **Target SDK:** API 35 (Android 15)
+- **Minimum Android Version:** Android 8.0 Oreo (API 26)
+- **Package Size:** Approximately 4.50 MB (4,723,326 bytes)
+- **Signing Scheme:** Privately release-signed APK (v2 signature scheme verified).
+- **SHA-256:** `30efa18ce0c5d4112d1eb79e7c990d7cf30764222fd8bc98ad2fb87d9183ec26`
 
-1. Open the APK download link above on your Android device.
-2. Download `tabzero-v1.0.0.apk`.
-3. Open the downloaded APK.
-4. If prompted, allow your browser or file manager to install unknown apps from that source.
-5. Return to the APK installer and tap **Install**.
-6. Open **tabzero.** after installation.
+#### What's New in v1.0.1
+- **Account Deletion:** Added permanent "Delete Account" option in Settings with atomic on-device database wipe.
+- **Keep-Style Mindful Notes:** Collapsible 2-column themed masonry cards with full-screen editor and live color switching.
+- **Habit Management:** One-tap habit deletion with confirmation on Home and Progress views.
+- **Accurate Step Calories:** Step-derived calorie calculation (`0.04 kcal / step`, exactly `0.0 kcal` when steps = 0).
+- **Battery Optimization Prompt:** Direct system intent prompt to whitelist tabzero as Unrestricted.
+- **Clean UI:** Removed redundant search bar on app selection screen; unified button styling.
+- **System Requirements & Compatibility:** Full technical specifications and OEM troubleshooting guides.
 
-> **Note:** Android may display a security warning because the APK is distributed outside the Google Play Store. Only download the APK from the official GitHub release.
->
-> If an older debug-signed version of tabzero. is installed, Android may reject the release APK as an update because its signing certificate differs. Uninstalling the old version first may be necessary, and this can delete its local app data.
->
-> For future updates, download the newer APK from the official GitHub Releases page.
+### Installing on Android (Sideloading)
+
+1. Download `tabzero-v1.0.1.apk` from the GitHub Release link above.
+2. Open the downloaded file in your Android file manager or browser.
+3. If prompted, allow your browser or file manager to install unknown apps from that source.
+4. Tap **Install** (or **Update** if updating from v1.0.0).
+5. Open **tabzero.** after installation completes.
+
+> **Note on Upgrading from v1.0.0:** Because v1.0.0 and v1.0.1 share the identical private release signing key and package identifier (`com.example.detoxproject`), you can install the v1.0.1 APK directly over v1.0.0 without losing your account, notes, habits, or streaks.
+
+### Previous Releases
+
+- **[v1.0.0](https://github.com/anirudhadg04/tabzero/releases/tag/v1.0.0)** — [tabzero-v1.0.0.apk](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.0/tabzero-v1.0.0.apk) (SHA-256: `e0f13064bdb9d2bdaccef2c0e3f07435171e86a9d8cbfd1ed529f4e8c205f7b3`)
 
 ## Privacy and Security
 

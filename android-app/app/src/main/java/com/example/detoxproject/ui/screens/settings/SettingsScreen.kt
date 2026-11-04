@@ -63,7 +63,8 @@ fun SettingsScreen(
     quickDetoxPackages: List<String>,
     onUpdateQuickDetoxPackages: (List<String>) -> Unit,
     quickDetoxDurationSeconds: Int = 1800,
-    onUpdateQuickDetoxDuration: (Int) -> Unit = {}
+    onUpdateQuickDetoxDuration: (Int) -> Unit = {},
+    onDeleteAccount: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val pm = context.packageManager
@@ -195,6 +196,7 @@ fun SettingsScreen(
     // Installed apps and Quick Detox selection
     val installedApps = remember { getInstalledApps(context) }
     var showAppPickerDialog by remember { mutableStateOf(false) }
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
     var showSelectedAppsGrid by remember { mutableStateOf(false) }
 
     val selectedApps = remember(quickDetoxPackages, installedApps) {
@@ -566,7 +568,7 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "+ Add / Manage Apps",
+                            text = "Add / Manage Apps",
                             style = Typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                             color = OfflineOnDarkButton
                         )
@@ -785,10 +787,14 @@ fun SettingsScreen(
                 PermissionItemRow(
                     icon = Icons.Default.BatteryChargingFull,
                     title = "Battery Unrestricted Mode",
-                    description = "Prevents Android OS from freezing step tracking and background session monitors.",
+                    description = if (isIgnoringBatteryOptimizations) {
+                        "Unrestricted: Android will not suspend step tracking or background monitors."
+                    } else {
+                        "Restricted by OS (Optimized): Background step tracking and timers may be frozen by Android."
+                    },
                     isGranted = isIgnoringBatteryOptimizations,
                     grantedLabel = "Unrestricted",
-                    actionLabel = "Optimize",
+                    actionLabel = "Allow Unrestricted",
                     onAction = {
                         try {
                             val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
@@ -797,10 +803,18 @@ fun SettingsScreen(
                             }
                             context.startActivity(intent)
                         } catch (_: Exception) {
-                            val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            try {
+                                val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                context.startActivity(intent)
+                            } catch (_: Exception) {
+                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.parse("package:${context.packageName}")
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                context.startActivity(intent)
                             }
-                            context.startActivity(intent)
                         }
                     }
                 )
@@ -957,7 +971,131 @@ fun SettingsScreen(
             }
         }
 
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // 5. Delete Account Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(22.dp),
+            colors = CardDefaults.cardColors(containerColor = OfflineSurface),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.35f))
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DeleteForever,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Delete Account",
+                                style = Typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                text = "Irreversible data wipe",
+                                style = Typography.labelSmall.copy(fontSize = 11.sp),
+                                color = OfflineTextSecondary
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "Permanently delete your account, focus sessions, custom habits, and mindful notes. All local SQLite databases for this profile will be completely wiped from this device.",
+                    style = Typography.bodySmall,
+                    color = OfflineTextSecondary,
+                    lineHeight = 18.sp
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                OutlinedButton(
+                    onClick = { showDeleteAccountDialog = true },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DeleteForever,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Delete Account",
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(30.dp))
+    }
+
+    if (showDeleteAccountDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAccountDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
+            title = {
+                Text(
+                    text = "Delete Account Permanently?",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "This will erase your account credentials, streaks, custom habits, and focus history from this device. This action cannot be undone."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteAccountDialog = false
+                        onDeleteAccount()
+                    }
+                ) {
+                    Text("Delete Permanently", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteAccountDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
