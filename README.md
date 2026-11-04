@@ -6,7 +6,7 @@
 
 [![Browser Extension](https://img.shields.io/badge/Browser%20Extension-Manifest%20V3-2E7D32?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/anirudhadg04/tabzero/tree/browser-extension)
 [![Android App](https://img.shields.io/badge/Android%20App-Jetpack%20Compose-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/anirudhadg04/tabzero/tree/android-app)
-[![Release](https://img.shields.io/badge/Release-v1.0.0-blue?style=for-the-badge)](https://github.com/anirudhadg04/tabzero/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.1-blue?style=for-the-badge)](https://github.com/anirudhadg04/tabzero/releases)
 
 ---
 
@@ -36,8 +36,8 @@ Choose your platform below to download the application, view installation instru
       <p><b>Kotlin · Jetpack Compose · Health Connect · Room Database</b></p>
       <p>A native, local-first mobile application designed for mindful habit building, physical movement goals, distraction-free focus sessions, and quiet offline reflection.</p>
       <br/>
-      <a href="https://github.com/anirudhadg04/tabzero/releases/download/v1.0.0/tabzero-v1.0.0.apk">
-        <img src="https://img.shields.io/badge/📥%20Download-Android%20APK%20(v1.0.0)-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK"/>
+      <a href="https://github.com/anirudhadg04/tabzero/releases/download/v1.0.1/tabzero-v1.0.1.apk">
+        <img src="https://img.shields.io/badge/📥%20Download-Android%20APK%20(v1.0.1)-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK"/>
       </a>
       <br/><br/>
       👉 <a href="https://github.com/anirudhadg04/tabzero/tree/android-app"><b>Explore Android App Branch (Source Code) →</b></a>
@@ -54,7 +54,7 @@ Choose your platform below to download the application, view installation instru
 | Platform | Git Branch | Direct Download | Documentation & Source |
 |:---|:---|:---|:---|
 | **🌐 Browser Extension** | [`browser-extension`](https://github.com/anirudhadg04/tabzero/tree/browser-extension) | [Download ZIP](https://github.com/anirudhadg04/tabzero/archive/refs/heads/browser-extension.zip) | [Extension Readme](https://github.com/anirudhadg04/tabzero/blob/browser-extension/README.md) |
-| **📱 Android Application** | [`android-app`](https://github.com/anirudhadg04/tabzero/tree/android-app) | [Download APK (v1.0.0)](https://github.com/anirudhadg04/tabzero/releases) | [Android Readme](https://github.com/anirudhadg04/tabzero/blob/android-app/README.md) |
+| **📱 Android Application** | [`android-app`](https://github.com/anirudhadg04/tabzero/tree/android-app) | [Download APK (v1.0.1)](https://github.com/anirudhadg04/tabzero/releases) | [Android Readme](https://github.com/anirudhadg04/tabzero/blob/android-app/README.md) |
 
 ---
 
@@ -79,7 +79,7 @@ Choose your platform below to download the application, view installation instru
 
 ### 2. 📱 Android Mobile Application
 
-1. **Download APK:** [Download `tabzero-v1.0.0.apk`](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.0/tabzero-v1.0.0.apk) from the [Releases page](https://github.com/anirudhadg04/tabzero/releases).
+1. **Download APK:** [Download `tabzero-v1.0.1.apk`](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.1/tabzero-v1.0.1.apk) from the [Releases page](https://github.com/anirudhadg04/tabzero/releases).
 2. **Install on Device:** Open the downloaded `.apk` file on your Android device. (Ensure "Install from unknown sources" is enabled in settings for your browser or file manager).
 3. **Open tabzero.:** Launch the app to track movement, set daily focus goals, and create distraction-free digital boundaries.
 
