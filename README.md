@@ -1,149 +1,100 @@
-# tabzero. — Digital Wellbeing Ecosystem
+<div align="center">
 
-repo- https://github.com/anirudhadg04/tabzero
+# tabzero.
 
-**tabzero.** is a digital wellbeing project designed to help people build healthier relationships with technology through focused sessions, mindful interventions, activity tracking, and habit development.
+### *Life happens beyond the screen. Move more. Scroll less. Live more.*
 
-The project consists of two independently developed components:
+[![Browser Extension](https://img.shields.io/badge/Browser%20Extension-Manifest%20V3-2E7D32?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/anirudhadg04/tabzero/tree/browser-extension)
+[![Android App](https://img.shields.io/badge/Android%20App-Jetpack%20Compose-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/anirudhadg04/tabzero/tree/android-app)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-blue?style=for-the-badge)](https://github.com/anirudhadg04/tabzero/releases)
 
-1. **Android Application** — a native Android digital detox and wellness application.
-2. **Browser Extension** — a browser-based distraction management and digital detox companion.
+---
 
-## Project Components
+**tabzero.** is a unified digital wellness ecosystem designed to help you build a healthier, more intentional relationship with technology.
 
-### 1. Android Application
+Choose your platform below to download the application, view installation instructions, or explore the branch source code:
 
-The Android application is built with Kotlin and Jetpack Compose.
+</div>
 
-Core themes:
+<br/>
 
-- **MOVE** — step tracking, fitness-related activity, and movement goals.
-- **DISCONNECT** — focus timers, detox sessions, and distraction pledges.
-- **RECONNECT** — habits, reflections, streaks, and outdoor activity suggestions.
+<table align="center" width="100%">
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <h2>🌐 Browser Extension</h2>
+      <p><b>Cross-Browser Manifest V3 · Chrome · Brave · Edge · Firefox · Safari</b></p>
+      <p>A serene, human-designed digital wellness companion that intercepts and redirects distracting websites to calming nature sanctuaries during active detox sessions. Features real-time website tracking, weather-aware offline recommendations, and a 5-step persistent undo/redo history engine.</p>
+      <br/>
+      <a href="https://github.com/anirudhadg04/tabzero/archive/refs/heads/browser-extension.zip">
+        <img src="https://img.shields.io/badge/📥%20Download-Extension%20ZIP-2E7D32?style=for-the-badge" alt="Download Extension ZIP"/>
+      </a>
+      <br/><br/>
+      👉 <a href="https://github.com/anirudhadg04/tabzero/tree/browser-extension"><b>Explore Browser Extension Branch (Source & Builds) →</b></a>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <h2>📱 Android Mobile App</h2>
+      <p><b>Kotlin · Jetpack Compose · Health Connect · Room Database</b></p>
+      <p>A native, local-first mobile application designed around three wellness pillars: <b>MOVE</b> (step tracking and movement goals), <b>DISCONNECT</b> (focus timers and distraction pledges), and <b>RECONNECT</b> (habit streaks and outdoor reflection).</p>
+      <br/>
+      <a href="https://github.com/anirudhadg04/tabzero/releases/download/v1.0.0/tabzero-v1.0.0.apk">
+        <img src="https://img.shields.io/badge/📥%20Download-Android%20APK%20(v1.0.0)-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK"/>
+      </a>
+      <br/><br/>
+      👉 <a href="https://github.com/anirudhadg04/tabzero/tree/android-app"><b>Explore Android App Branch (Source Code) →</b></a>
+    </td>
+  </tr>
+</table>
 
-Key capabilities include:
+<br/>
 
-- Focus sessions with countdown notifications and alarm management.
-- Habit tracking and progress history.
-- Undo and redo support for supported state operations.
-- XP progression, streaks, levels, and achievements.
-- Health Connect integration for supported fitness data.
-- Weather-based activity suggestions.
+---
 
-**Architecture and privacy**
+## 🗂️ Platform Navigation & Branches
 
-- Local-first application architecture.
-- Room database for on-device persistence.
-- User and wellness data are stored locally on the device.
-- Weather information is retrieved from the Open-Meteo API over HTTPS.
-- The weather integration uses configured regional coordinates rather than live GPS tracking.
-- The application is not completely offline because weather retrieval requires network access.
+| Platform | Git Branch | Direct Download | Documentation & Source |
+|:---|:---|:---|:---|
+| **🌐 Browser Extension** | [`browser-extension`](https://github.com/anirudhadg04/tabzero/tree/browser-extension) | [Download ZIP](https://github.com/anirudhadg04/tabzero/archive/refs/heads/browser-extension.zip) | [Extension Readme](https://github.com/anirudhadg04/tabzero/blob/browser-extension/README.md) |
+| **📱 Android Application** | [`android-app`](https://github.com/anirudhadg04/tabzero/tree/android-app) | [Download APK (v1.0.0)](https://github.com/anirudhadg04/tabzero/releases) | [Android Readme](https://github.com/anirudhadg04/tabzero/blob/android-app/README.md) |
 
-**Technology:** Kotlin, Jetpack Compose, Room, Coroutines, Health Connect, Open-Meteo.
+---
 
-**Build instructions:** See the Android project in [`android-app/`](android-app/).
+## 🚀 Quick Installation Guides
 
-### 2. Browser Extension
+### 1. 🌐 Browser Extension (Chrome, Brave, Edge, Opera, Firefox)
 
-The browser extension is a companion digital detox tool developed independently.
+#### For Chromium-Based Browsers (Google Chrome, Microsoft Edge, Brave, Opera, Arc):
+1. **Download:** [Click here to download the extension archive (`browser-extension.zip`)](https://github.com/anirudhadg04/tabzero/archive/refs/heads/browser-extension.zip) and extract it on your computer.
+2. **Open Extensions Page:** Navigate to `chrome://extensions` (or `edge://extensions`, `brave://extensions`).
+3. **Enable Developer Mode:** Toggle on **Developer mode** in the top right corner.
+4. **Load Unpacked:** Click **Load unpacked** and select the `dist/` directory inside the extracted folder.
+5. **Pin & Enjoy:** Pin **tabzero.** to your toolbar for immediate mindful focus and deflection protection.
 
-Its functionality includes:
+#### For Mozilla Firefox:
+1. **Download:** [Download the extension archive](https://github.com/anirudhadg04/tabzero/archive/refs/heads/browser-extension.zip) and extract it.
+2. **Open Debugging:** Navigate to `about:debugging#/runtime/this-firefox` in Firefox.
+3. **Load Add-on:** Click **Load Temporary Add-on...**.
+4. **Select Manifest:** Select `dist-firefox/manifest.json` from the extracted folder.
 
-- Website and domain blocking.
-- Detox sessions and blocking interventions.
-- Browser usage tracking.
-- History and undo/redo functionality.
-- Weather-related recommendations.
-- Achievement and progress features.
+---
 
-**Technology:** TypeScript, React, Vite, and Manifest V3.
+### 2. 📱 Android Mobile Application
 
-The extension has browser-specific manifests and build configuration. Refer to its source and build scripts for supported browser targets and installation instructions.
+1. **Download APK:** [Download `tabzero-v1.0.0.apk`](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.0/tabzero-v1.0.0.apk) from the [Releases page](https://github.com/anirudhadg04/tabzero/releases).
+2. **Install on Device:** Open the downloaded `.apk` file on your Android device. (Ensure "Install from unknown sources" is enabled in settings for your browser or file manager).
+3. **Open tabzero.:** Launch the app to track movement, set daily focus goals, and create distraction-free digital boundaries.
 
-## Repository Structure
+---
 
-```text
-tabzero/
-├── README.md
-├── src/                  # Browser extension source
-├── public/               # Browser extension manifests and assets
-├── backend/              # Extension backend components
-├── scripts/              # Extension scripts
-├── android-app/           # Native Android application
-│   ├── app/
-│   ├── gradle/
-│   ├── build.gradle.kts
-│   ├── settings.gradle.kts
-│   └── gradlew
-└── ...
-```
+## 🌿 The tabzero. Philosophy
 
-The exact directories depend on the component being developed and the branch being viewed.
+Digital life should empower you, not consume you. **tabzero.** bridges the gap between desktop browsing and mobile living:
 
-## Development
+- **Movement (MOVE):** Encouraging physical steps and outdoor walks over sedentary infinite scrolling.
+- **Mindful Space (DISCONNECT):** Gentle, beautiful interventions replacing compulsive tab opening with peaceful landscapes.
+- **Real-World Living (RECONNECT):** Weather-aware offline activity suggestions (journaling, tea brewing, outdoor walks) that remind you life happens beyond the glass.
 
-### Android
+---
 
-Open `android-app/` as a project in Android Studio.
-
-Run unit tests:
-
-```bash
-gradlew test
-```
-
-Build a debug APK:
-
-```bash
-gradlew assembleDebug
-```
-
-The generated debug APK is located at:
-
-```text
-app/build/outputs/apk/debug/app-debug.apk
-```
-
-### Browser Extension
-
-The browser extension has its own `package.json`, dependencies, manifests, and build scripts. Follow the instructions in its source and build configuration.
-
-To build the extension:
-
-```bash
-npm install
-npm run build
-```
-
-The compiled extension is generated inside `dist/`. Load it unpacked via `chrome://extensions` in Chromium-based browsers.
-
-## Branches
-
-| Branch | Purpose |
-|---|---|
-| `browser-extension` | Browser extension development |
-| `android-app` | Android application development |
-
-Both branches share this repository's combined project overview. The Android application is maintained in its own directory on the `android-app` branch.
-
-## Releases
-
-Android testing APK builds are distributed through [GitHub Releases](https://github.com/anirudhadg04/tabzero/releases).
-
-Release assets are separate from the source code so generated binaries do not increase repository history.
-
-- **Current Testing Release:** `v1.0.0`
-- **Release Asset:** `tabzero-v1.0.0.apk`
-- **Asset SHA-256:** `f619168ba25cefb186deb2536e125e67aa3749a07a5da50ae1861699a2b1a637`
-- **Note:** This is a debug-signed Android testing build intended for evaluation and testing, not a production Google Play Store release.
-
-## Privacy and Security
-
-- Do not commit `.env` files, passwords, API tokens, keystores, or signing credentials.
-- Do not commit local databases, personal account information, or user-generated application data.
-- Keep machine-specific configuration and build outputs out of version control.
-- Review permissions and network integrations before distributing builds.
-
-## Project Goal
-
-tabzero. aims to make digital wellbeing practical by combining browser-level distraction management with a native mobile application for focus, movement, and healthy routines.
+<div align="center">
+  <sub>tabzero. · Crafted with intentionality for mindful digital living.</sub>
+</div>
