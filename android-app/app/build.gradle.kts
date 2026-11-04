@@ -16,13 +16,53 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProperties = java.util.Properties()
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                val storeFilePath = keystoreProperties.getProperty("storeFile")
+                val storeFileObj = storeFilePath?.let { p ->
+                    val f = java.io.File(p)
+                    if (f.isAbsolute) f else rootProject.file(p)
+                }
+                if (storeFileObj != null && storeFileObj.exists()) {
+                    storeFile = storeFileObj
+                    storePassword = keystoreProperties.getProperty("storePassword")
+                    keyAlias = keystoreProperties.getProperty("keyAlias")
+                    keyPassword = keystoreProperties.getProperty("keyPassword")
+                } else {
+                    throw org.gradle.api.GradleException(
+                        "Release keystore file does not exist: $storeFilePath. Please verify storeFile in keystore.properties."
+                    )
+                }
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                val isReleaseBuild = gradle.startParameter.taskNames.any {
+                    it.contains("Release", ignoreCase = true)
+                }
+                if (isReleaseBuild) {
+                    throw org.gradle.api.GradleException(
+                        "Release build requires signing configuration. Please create keystore.properties in the android-app root with storeFile, storePassword, keyAlias, and keyPassword."
+                    )
+                }
+            }
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
