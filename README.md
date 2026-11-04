@@ -34,7 +34,7 @@ Choose your platform below to download the application, view installation instru
     <td width="50%" align="center" valign="top">
       <h2>📱 Android Mobile App</h2>
       <p><b>Kotlin · Jetpack Compose · Health Connect · Room Database</b></p>
-      <p>A native, local-first mobile application designed around three wellness pillars: <b>MOVE</b> (step tracking and movement goals), <b>DISCONNECT</b> (focus timers and distraction pledges), and <b>RECONNECT</b> (habit streaks and outdoor reflection).</p>
+      <p>A native, local-first mobile application designed for mindful habit building, physical movement goals, distraction-free focus sessions, and quiet offline reflection.</p>
       <br/>
       <a href="https://github.com/anirudhadg04/tabzero/releases/download/v1.0.0/tabzero-v1.0.0.apk">
         <img src="https://img.shields.io/badge/📥%20Download-Android%20APK%20(v1.0.0)-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK"/>
@@ -87,11 +87,12 @@ Choose your platform below to download the application, view installation instru
 
 ## 🌿 The tabzero. Philosophy
 
-Digital life should empower you, not consume you. **tabzero.** bridges the gap between desktop browsing and mobile living:
+Technology should serve human intention, not exploit human attention. **tabzero.** bridges desktop browsing and mobile living with a shared philosophy rooted in calm, autonomy, and real-world presence:
 
-- **Movement (MOVE):** Encouraging physical steps and outdoor walks over sedentary infinite scrolling.
-- **Mindful Space (DISCONNECT):** Gentle, beautiful interventions replacing compulsive tab opening with peaceful landscapes.
-- **Real-World Living (RECONNECT):** Weather-aware offline activity suggestions (journaling, tea brewing, outdoor walks) that remind you life happens beyond the glass.
+- **Quiet Friction, Never Punishment:** We reject hostile lockers and punitive alarms. When compulsive habits kick in, tabzero replaces infinite scrolling and infinite tabs with peaceful nature sanctuaries—inviting you to pause, breathe, and step away on your own terms.
+- **Autonomy Over Algorithms:** No rigid categories, arbitrary quotas, or pre-baked schedules. Your offline time and pledges are entirely user-defined, dynamic, and flexible, supported by persistent 5-step undo/redo so you remain in complete control.
+- **Rooted in the Physical World:** Traditional wellness trackers often keep you staring at screens analyzing screen time charts. tabzero connects with live weather intelligence to offer context-aware nudges—reminding you to walk under open skies when it's bright or enjoy mindful indoor focus when it rains.
+- **Local-First & Uncompromised Privacy:** Your focus, screen time, and habits are sacred personal data. Both the browser extension and mobile application operate entirely on-device—no cloud lock-in, no telemetry, and no surveillance.
 
 ---
 
