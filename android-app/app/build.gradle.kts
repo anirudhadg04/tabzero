@@ -1,3 +1,7 @@
+import java.io.File
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -22,26 +26,29 @@ android {
     }
 
     val keystorePropertiesFile = rootProject.file("keystore.properties")
-    val keystoreProperties = java.util.Properties()
+    val keystoreProperties = Properties()
     if (keystorePropertiesFile.exists()) {
-        keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+        FileInputStream(keystorePropertiesFile).use { stream ->
+            keystoreProperties.load(stream)
+        }
     }
 
     signingConfigs {
         create("release") {
             if (keystorePropertiesFile.exists()) {
                 val storeFilePath = keystoreProperties.getProperty("storeFile")
-                val storeFileObj = storeFilePath?.let { p ->
-                    val f = java.io.File(p)
-                    if (f.isAbsolute) f else rootProject.file(p)
-                }
+                val storeFileObj: File? = if (!storeFilePath.isNullOrBlank()) {
+                    val f = File(storeFilePath)
+                    if (f.isAbsolute) f else rootProject.file(storeFilePath)
+                } else null
+
                 if (storeFileObj != null && storeFileObj.exists()) {
                     storeFile = storeFileObj
                     storePassword = keystoreProperties.getProperty("storePassword")
                     keyAlias = keystoreProperties.getProperty("keyAlias")
                     keyPassword = keystoreProperties.getProperty("keyPassword")
                 } else {
-                    throw org.gradle.api.GradleException(
+                    throw GradleException(
                         "Release keystore file does not exist: $storeFilePath. Please verify storeFile in keystore.properties."
                     )
                 }
