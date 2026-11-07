@@ -4,6 +4,7 @@ import androidx.room.withTransaction
 import com.example.detoxproject.data.local.OfflineDatabase
 import com.example.detoxproject.data.local.entity.*
 import java.time.LocalDate
+import java.time.ZoneId
 
 class UndoRedoManager(
     private val database: OfflineDatabase,
@@ -24,9 +25,17 @@ class UndoRedoManager(
         zenXpManager.currentUserId = userId
     }
 
+    fun getTodayRange(referenceDate: LocalDate = LocalDate.now()): Pair<Long, Long> {
+        val zone = ZoneId.systemDefault()
+        val start = referenceDate.atStartOfDay(zone).toInstant().toEpochMilli()
+        val end = referenceDate.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+        return Pair(start, end)
+    }
+
     /**
-     * Records a new state-changing operation into the persistent 5-step stack.
-     * Enforces the 5-item limit and clears the redo (future) stack.
+     * Records a new state-changing operation into the persistent 5-step daily stack.
+     * Automatically clears actions from prior days, enforces the 5-item limit for today,
+     * and clears the redo (future) stack.
      */
     suspend fun recordOperation(
         actionType: String,
@@ -34,14 +43,19 @@ class UndoRedoManager(
         entityType: String,
         entityId: Long,
         beforeJson: String?,
-        afterJson: String?
+        afterJson: String?,
+        referenceDate: LocalDate = LocalDate.now()
     ) = database.withTransaction {
+        val (startOfDay, endOfDay) = getTodayRange(referenceDate)
+
+        // Automatically purge any undo/redo actions from prior days to reset daily stack
+        historyDao.purgePastDaysHistory(startOfDay, currentUserId)
         historyDao.clearFuture(currentUserId)
 
-        val pastActions = historyDao.getPastActionsDirect(currentUserId)
+        val pastActions = historyDao.getTodayPastActionsDirect(currentUserId, startOfDay, endOfDay)
         if (pastActions.size >= 5) {
             val excess = pastActions.size - 4
-            historyDao.trimOldestPast(excess, currentUserId)
+            historyDao.trimOldestTodayPast(excess, startOfDay, endOfDay, currentUserId)
         }
 
         val nextOrder = (pastActions.maxOfOrNull { it.sequenceOrder } ?: 0) + 1
@@ -65,8 +79,13 @@ class UndoRedoManager(
      * Undoes the most recent operation from PAST, moves it to FUTURE,
      * reverses associated XP in the append-only ledger, and recalculates dependent aggregates.
      */
-    suspend fun undo(): Boolean = database.withTransaction {
-        val latest = historyDao.getLatestPastAction(currentUserId) ?: return@withTransaction false
+    suspend fun undo(referenceDate: LocalDate = LocalDate.now()): Boolean = database.withTransaction {
+        val (startOfDay, endOfDay) = getTodayRange(referenceDate)
+        val latest = historyDao.getLatestTodayPastAction(currentUserId, startOfDay, endOfDay) ?: return@withTransaction false
+
+        if (latest.timestamp < startOfDay || latest.timestamp >= endOfDay) {
+            return@withTransaction false
+        }
 
         when (latest.entityType) {
             "SESSION" -> {
@@ -189,8 +208,13 @@ class UndoRedoManager(
      * Redoes the next operation from FUTURE, moves it to PAST,
      * restores reversed XP in the ledger, and recalculates dependent aggregates.
      */
-    suspend fun redo(): Boolean = database.withTransaction {
-        val next = historyDao.getNextFutureAction(currentUserId) ?: return@withTransaction false
+    suspend fun redo(referenceDate: LocalDate = LocalDate.now()): Boolean = database.withTransaction {
+        val (startOfDay, endOfDay) = getTodayRange(referenceDate)
+        val next = historyDao.getNextTodayFutureAction(currentUserId, startOfDay, endOfDay) ?: return@withTransaction false
+
+        if (next.timestamp < startOfDay || next.timestamp >= endOfDay) {
+            return@withTransaction false
+        }
 
         when (next.entityType) {
             "SESSION" -> {

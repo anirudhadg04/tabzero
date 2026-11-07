@@ -197,6 +197,18 @@ fun SettingsScreen(
     val installedApps = remember { getInstalledApps(context) }
     var showAppPickerDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
+    var showPermissionGuide by remember { mutableStateOf(false) }
+    var pendingPermissionKey by remember { mutableStateOf<String?>(null) }
+    var pendingPermissionAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+    fun triggerPermissionFlow(key: String, onExecute: () -> Unit) {
+        if (PermissionEducationManager.hasSeenExplanation(context, key)) {
+            onExecute()
+        } else {
+            pendingPermissionAction = onExecute
+            pendingPermissionKey = key
+        }
+    }
     var showSelectedAppsGrid by remember { mutableStateOf(false) }
 
     val selectedApps = remember(quickDetoxPackages, installedApps) {
@@ -249,7 +261,7 @@ fun SettingsScreen(
                 )
             }
             Spacer(modifier = Modifier.width(14.dp))
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "settings",
                     style = Typography.headlineLarge.copy(fontSize = 28.sp, fontWeight = FontWeight.SemiBold),
@@ -259,6 +271,19 @@ fun SettingsScreen(
                     text = "Preferences, permissions & quick detox setup",
                     style = Typography.labelSmall,
                     color = OfflineTextSecondary
+                )
+            }
+            IconButton(
+                onClick = { showPermissionGuide = true },
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(OfflineSurfaceVariant)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.HelpOutline,
+                    contentDescription = "Permission & Privacy Guide",
+                    tint = OfflineAccentPrimary
                 )
             }
         }
@@ -661,8 +686,10 @@ fun SettingsScreen(
                     grantedLabel = "Granted",
                     actionLabel = "Grant Permission",
                     onAction = {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            activityRecognitionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                        triggerPermissionFlow(PermissionEducationManager.PERM_ACTIVITY_RECOGNITION) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                activityRecognitionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                            }
                         }
                     }
                 )
@@ -679,8 +706,10 @@ fun SettingsScreen(
                     grantedLabel = "Installed",
                     actionLabel = if (liveHcStatus == HealthConnectStatus.UPDATE_REQUIRED) "Update Required" else "Setup Health Connect",
                     onAction = {
-                        val healthManager = HealthActivityManager(context)
-                        context.startActivity(healthManager.createHealthConnectIntent())
+                        triggerPermissionFlow(PermissionEducationManager.PERM_HEALTH_CONNECT) {
+                            val healthManager = HealthActivityManager(context)
+                            context.startActivity(healthManager.createHealthConnectIntent())
+                        }
                     }
                 )
 
@@ -695,7 +724,9 @@ fun SettingsScreen(
                     grantedLabel = "Active",
                     actionLabel = "Open Settings",
                     onAction = {
-                        context.startActivity(UsageStatsHelper.createUsageAccessIntent())
+                        triggerPermissionFlow(PermissionEducationManager.PERM_USAGE_ACCESS) {
+                            context.startActivity(UsageStatsHelper.createUsageAccessIntent())
+                        }
                     }
                 )
 
@@ -710,9 +741,11 @@ fun SettingsScreen(
                     grantedLabel = "Active",
                     actionLabel = "Enable Service",
                     onAction = {
-                        context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        })
+                        triggerPermissionFlow(PermissionEducationManager.PERM_ACCESSIBILITY) {
+                            context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            })
+                        }
                     }
                 )
 
@@ -727,13 +760,15 @@ fun SettingsScreen(
                     grantedLabel = "Allowed",
                     actionLabel = "Allow",
                     onAction = {
-                        val intent = Intent(
-                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                            Uri.parse("package:${context.packageName}")
-                        ).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        triggerPermissionFlow(PermissionEducationManager.PERM_OVERLAY) {
+                            val intent = Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:${context.packageName}")
+                            ).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            context.startActivity(intent)
                         }
-                        context.startActivity(intent)
                     }
                 )
 
@@ -748,14 +783,16 @@ fun SettingsScreen(
                     grantedLabel = "Allowed",
                     actionLabel = "Allow",
                     onAction = {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        } else {
-                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        triggerPermissionFlow(PermissionEducationManager.PERM_NOTIFICATIONS) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                context.startActivity(intent)
                             }
-                            context.startActivity(intent)
                         }
                     }
                 )
@@ -771,12 +808,14 @@ fun SettingsScreen(
                     grantedLabel = "Enabled",
                     actionLabel = "Enable",
                     onAction = {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                                data = Uri.parse("package:${context.packageName}")
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        triggerPermissionFlow(PermissionEducationManager.PERM_EXACT_ALARMS) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                                    data = Uri.parse("package:${context.packageName}")
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                context.startActivity(intent)
                             }
-                            context.startActivity(intent)
                         }
                     }
                 )
@@ -796,24 +835,26 @@ fun SettingsScreen(
                     grantedLabel = "Unrestricted",
                     actionLabel = "Allow Unrestricted",
                     onAction = {
-                        try {
-                            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                                data = Uri.parse("package:${context.packageName}")
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            }
-                            context.startActivity(intent)
-                        } catch (_: Exception) {
+                        triggerPermissionFlow(PermissionEducationManager.PERM_BATTERY_OPTIMIZATION) {
                             try {
-                                val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
-                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                }
-                                context.startActivity(intent)
-                            } catch (_: Exception) {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
                                     data = Uri.parse("package:${context.packageName}")
                                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 }
                                 context.startActivity(intent)
+                            } catch (_: Exception) {
+                                try {
+                                    val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    }
+                                    context.startActivity(intent)
+                                } catch (_: Exception) {
+                                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = Uri.parse("package:${context.packageName}")
+                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    }
+                                    context.startActivity(intent)
+                                }
                             }
                         }
                     }
@@ -973,7 +1014,12 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 5. Delete Account Card
+        // 5. About tabzero. Card
+        AboutTabzeroCard()
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // 6. Delete Account Card
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(22.dp),
@@ -1057,6 +1103,105 @@ fun SettingsScreen(
         }
 
         Spacer(modifier = Modifier.height(30.dp))
+    }
+
+    if (showPermissionGuide) {
+        PermissionPrivacyGuideDialog(
+            status = PermissionGuideStatus(
+                hasUsageAccess = hasUsageAccess,
+                hasAccessibility = hasAccessibilityService,
+                hasOverlay = hasOverlayPermission,
+                hasNotifications = hasNotificationPermission,
+                hasExactAlarms = canScheduleExactAlarms,
+                hasActivityRecognition = hasActivityRecognition,
+                healthConnectStatus = liveHcStatus,
+                isBatteryUnrestricted = isIgnoringBatteryOptimizations
+            ),
+            onDismiss = { showPermissionGuide = false },
+            onRequestPermissionAction = { key ->
+                showPermissionGuide = false
+                when (key) {
+                    PermissionEducationManager.PERM_USAGE_ACCESS -> {
+                        context.startActivity(UsageStatsHelper.createUsageAccessIntent())
+                    }
+                    PermissionEducationManager.PERM_ACCESSIBILITY -> {
+                        context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        })
+                    }
+                    PermissionEducationManager.PERM_OVERLAY -> {
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:${context.packageName}")
+                        ).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                        context.startActivity(intent)
+                    }
+                    PermissionEducationManager.PERM_NOTIFICATIONS -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            context.startActivity(intent)
+                        }
+                    }
+                    PermissionEducationManager.PERM_EXACT_ALARMS -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                                data = Uri.parse("package:${context.packageName}")
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            context.startActivity(intent)
+                        }
+                    }
+                    PermissionEducationManager.PERM_ACTIVITY_RECOGNITION -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            activityRecognitionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                        }
+                    }
+                    PermissionEducationManager.PERM_HEALTH_CONNECT -> {
+                        val healthManager = HealthActivityManager(context)
+                        context.startActivity(healthManager.createHealthConnectIntent())
+                    }
+                    PermissionEducationManager.PERM_BATTERY_OPTIMIZATION -> {
+                        try {
+                            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                                data = Uri.parse("package:${context.packageName}")
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            context.startActivity(intent)
+                        } catch (_: Exception) {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.parse("package:${context.packageName}")
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            context.startActivity(intent)
+                        }
+                    }
+                }
+            }
+        )
+    }
+
+    pendingPermissionKey?.let { key ->
+        val detail = PermissionEducationManager.getDetail(key)
+        PermissionExplanationDialog(
+            detail = detail,
+            onContinue = {
+                PermissionEducationManager.markExplanationSeen(context, key)
+                pendingPermissionAction?.invoke()
+                pendingPermissionKey = null
+                pendingPermissionAction = null
+            },
+            onDismiss = {
+                pendingPermissionKey = null
+                pendingPermissionAction = null
+            }
+        )
     }
 
     if (showDeleteAccountDialog) {

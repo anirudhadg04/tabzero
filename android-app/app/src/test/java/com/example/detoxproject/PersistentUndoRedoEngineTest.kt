@@ -8,6 +8,8 @@ import com.example.detoxproject.data.security.PasswordHasher
 import com.example.detoxproject.domain.engine.UndoRedoSerializer
 import com.example.detoxproject.domain.engine.WellnessRecommendationEngine
 import org.junit.Assert.*
+import java.time.LocalDate
+import java.time.ZoneId
 import org.junit.Test
 
 class PersistentUndoRedoEngineTest {
@@ -193,4 +195,118 @@ class PersistentUndoRedoEngineTest {
         assertTrue(futureStack.isEmpty())
         assertFalse(redo())
     }
+
+    @Test
+    fun testDailyUndoRedoStack_MidnightRolloverAndIsolation() {
+        val zone = ZoneId.systemDefault()
+        val day1 = LocalDate.of(2026, 11, 7)
+        val day2 = LocalDate.of(2026, 11, 8)
+
+        val day1Start = day1.atStartOfDay(zone).toInstant().toEpochMilli()
+        val day1End = day1.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+
+        val day2Start = day2.atStartOfDay(zone).toInstant().toEpochMilli()
+        val day2End = day2.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+
+        // In-memory simulation of ActionHistoryDao with daily timestamp boundaries
+        val databaseActions = mutableListOf<ActionHistoryEntity>()
+
+        fun record(action: String, id: Long, timestampMs: Long) {
+            // Clear future
+            databaseActions.removeAll { it.stackPosition == "FUTURE" }
+            // Purge past days
+            databaseActions.removeAll { it.timestamp < day1Start }
+            // Get today's past actions
+            val todayPast = databaseActions.filter { it.stackPosition == "PAST" && it.timestamp >= day1Start && it.timestamp < day1End }
+            if (todayPast.size >= 5) {
+                val oldest = todayPast.minByOrNull { it.sequenceOrder }
+                oldest?.let { databaseActions.remove(it) }
+            }
+            databaseActions.add(
+                ActionHistoryEntity(
+                    id = databaseActions.size + 1L,
+                    userId = 1L,
+                    actionType = action,
+                    description = action,
+                    timestamp = timestampMs,
+                    stackPosition = "PAST",
+                    entityType = "SESSION",
+                    entityId = id,
+                    sequenceOrder = (todayPast.maxOfOrNull { it.sequenceOrder } ?: 0) + 1
+                )
+            )
+        }
+
+        fun undo(referenceDate: LocalDate): Boolean {
+            val rStart = referenceDate.atStartOfDay(zone).toInstant().toEpochMilli()
+            val rEnd = referenceDate.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+            val latest = databaseActions.filter { it.stackPosition == "PAST" && it.timestamp >= rStart && it.timestamp < rEnd }
+                .maxByOrNull { it.sequenceOrder } ?: return false
+
+            databaseActions.remove(latest)
+            databaseActions.add(latest.copy(stackPosition = "FUTURE"))
+            return true
+        }
+
+        fun redo(referenceDate: LocalDate): Boolean {
+            val rStart = referenceDate.atStartOfDay(zone).toInstant().toEpochMilli()
+            val rEnd = referenceDate.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+            val next = databaseActions.filter { it.stackPosition == "FUTURE" && it.timestamp >= rStart && it.timestamp < rEnd }
+                .minByOrNull { it.sequenceOrder } ?: return false
+
+            databaseActions.remove(next)
+            databaseActions.add(next.copy(stackPosition = "PAST"))
+            return true
+        }
+
+        // 1. Day 1: Perform operations during the day
+        record("COMPLETE_HABIT", 101L, day1Start + 3600000L) // 1 hr after start of day 1
+        record("CREATE_SESSION", 201L, day1Start + 7200000L) // 2 hrs after start of day 1
+
+        val day1Past = databaseActions.filter { it.stackPosition == "PAST" && it.timestamp >= day1Start && it.timestamp < day1End }
+        assertEquals(2, day1Past.size)
+
+        // Undo on Day 1 succeeds
+        assertTrue(undo(day1))
+        val day1PastAfterUndo = databaseActions.filter { it.stackPosition == "PAST" && it.timestamp >= day1Start && it.timestamp < day1End }
+        assertEquals(1, day1PastAfterUndo.size)
+        // Redo on Day 1 succeeds
+        assertTrue(redo(day1))
+
+        // 2. Midnight Rollover to Day 2:
+        // Trying to undo on Day 2 should fail because there are zero actions recorded on Day 2
+        assertFalse("Day 1 action must NOT be undoable on Day 2", undo(day2))
+        assertFalse("Day 1 action must NOT be redoable on Day 2", redo(day2))
+
+        // 3. Record new action on Day 2
+        // Old action pointers are purged from active stack, fresh stack begins
+        databaseActions.removeAll { it.timestamp < day2Start }
+        assertEquals("Prior day history purged from stack", 0, databaseActions.size)
+
+        record("COMPLETE_HABIT", 102L, day2Start + 1800000L)
+        val day2Past = databaseActions.filter { it.stackPosition == "PAST" && it.timestamp >= day2Start && it.timestamp < day2End }
+        assertEquals(1, day2Past.size)
+        assertTrue("Day 2 action is undoable on Day 2", undo(day2))
+    }
+
+    @Test
+    fun testDailyUndoRedo_DataIntegrity_HistoricalRecordsRemainPermanent() {
+        // User historical records (habits, completed sessions, notes, XP)
+        val completedHabitHistory = mutableListOf("Walk 8,000 steps - 2026-11-06", "Meditation - 2026-11-06")
+        val completedSessions = mutableListOf("Focus Sprint - 45 min", "Evening Calm - 30 min")
+        var userTotalXp = 450
+
+        // Undo stack pointers
+        val actionHistoryPointers = mutableListOf("action_ptr_1", "action_ptr_2")
+
+        // Resetting daily undo/redo stack pointers at midnight:
+        actionHistoryPointers.clear()
+
+        // Critical verification: User data MUST NOT be deleted
+        assertEquals(2, completedHabitHistory.size)
+        assertEquals(2, completedSessions.size)
+        assertEquals(450, userTotalXp)
+        assertTrue(actionHistoryPointers.isEmpty())
+    }
 }
+

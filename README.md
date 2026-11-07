@@ -153,38 +153,37 @@ For full technical specifications, OEM setup guides, and permission fallback beh
 
 The Android application is distributed through GitHub Releases.
 
-### Latest Release: v1.0.1
+### Latest Release: v1.0.2
 
-- **Release Tag:** [v1.0.1](https://github.com/anirudhadg04/tabzero/releases/tag/v1.0.1)
-- **Direct Download:** [tabzero-v1.0.1.apk](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.1/tabzero-v1.0.1.apk)
-- **Version:** 1.0.1
+- **Release Tag:** [v1.0.2](https://github.com/anirudhadg04/tabzero/releases/tag/v1.0.2)
+- **Direct Download:** [tabzero-v1.0.2.apk](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.2/tabzero-v1.0.2.apk)
+- **Version:** 1.0.2
 - **Target SDK:** API 35 (Android 15)
 - **Minimum Android Version:** Android 8.0 Oreo (API 26)
-- **Package Size:** Approximately 4.50 MB (4,723,326 bytes)
+- **Package Size:** Approximately 4.54 MB (4,756,318 bytes)
 - **Signing Scheme:** Privately release-signed APK (v2 signature scheme verified).
-- **SHA-256:** `f58b8a57514facff3f97bb7809f099cd4cba8c45032ea4049bb421bc6c552783`
+- **SHA-256:** `6e7e7e33a32431630f2e000b51f9bceea44a10a896ad2cf0f17ef8decaf0e78c`
 
-#### What's New in v1.0.1
-- **Account Deletion:** Added permanent "Delete Account" option in Settings with atomic on-device database wipe.
-- **Keep-Style Mindful Notes:** Collapsible 2-column themed masonry cards with full-screen editor and live color switching.
-- **Habit Management:** One-tap habit deletion with confirmation on Home and Progress views.
-- **Accurate Step Calories:** Step-derived calorie calculation (`0.04 kcal / step`, exactly `0.0 kcal` when steps = 0).
-- **Battery Optimization Prompt:** Direct system intent prompt to whitelist tabzero as Unrestricted.
-- **Clean UI:** Removed redundant search bar on app selection screen; unified button styling.
-- **System Requirements & Compatibility:** Full technical specifications and OEM troubleshooting guides.
+#### What's New in v1.0.2
+- **Reboot & Process-Death Recovery:** Active Digital Detox sessions seamlessly survive OS background kills and device restarts without resetting timers or duplicating alarms.
+- **Boot Completed Integration:** Restores alarms, notifications, and restricted app enforcement automatically on device boot (`RECEIVE_BOOT_COMPLETED`).
+- **Offline Privacy Transparency:** Added dedicated Settings Privacy Guide `(?)` and granular permission explanation dialogs confirming 100% on-device processing.
+- **Daily Undo/Redo Boundary:** Undo/redo operations reset daily for optimal performance while safely preserving complete historical records.
+- **About Tabzero:** Added comprehensive About card in Settings explaining mindful architecture and local privacy guarantees.
 
 ### Installing on Android (Sideloading)
 
-1. Download `tabzero-v1.0.1.apk` from the GitHub Release link above.
+1. Download `tabzero-v1.0.2.apk` from the GitHub Release link above.
 2. Open the downloaded file in your Android file manager or browser.
 3. If prompted, allow your browser or file manager to install unknown apps from that source.
-4. Tap **Install** (or **Update** if updating from v1.0.0).
+4. Tap **Install** (or **Update** if updating from v1.0.0 or v1.0.1).
 5. Open **tabzero.** after installation completes.
 
-> **Note on Upgrading from v1.0.0:** Because v1.0.0 and v1.0.1 share the identical private release signing key and package identifier (`com.example.detoxproject`), you can install the v1.0.1 APK directly over v1.0.0 without losing your account, notes, habits, or streaks.
+> **Note on Upgrading:** Because v1.0.0, v1.0.1, and v1.0.2 share the identical private release signing key and package identifier (`com.example.detoxproject`), you can install the v1.0.2 APK directly over older versions without losing your account, notes, habits, or streaks.
 
 ### Previous Releases
 
+- **[v1.0.1](https://github.com/anirudhadg04/tabzero/releases/tag/v1.0.1)** — [tabzero-v1.0.1.apk](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.1/tabzero-v1.0.1.apk) (SHA-256: `30efa18ce0c5d4112d1eb79e7c990d7cf30764222fd8bc98ad2fb87d9183ec26`)
 - **[v1.0.0](https://github.com/anirudhadg04/tabzero/releases/tag/v1.0.0)** — [tabzero-v1.0.0.apk](https://github.com/anirudhadg04/tabzero/releases/download/v1.0.0/tabzero-v1.0.0.apk) (SHA-256: `e0f13064bdb9d2bdaccef2c0e3f07435171e86a9d8cbfd1ed529f4e8c205f7b3`)
 
 ## Privacy and Security

@@ -15,6 +15,9 @@ interface DetoxDao {
     @Query("SELECT * FROM detox_sessions WHERE userId = :userId AND (status = 'ACTIVE' OR status = 'PAUSED') ORDER BY startTime DESC LIMIT 1")
     suspend fun getActiveSessionDirect(userId: Long = 1L): DetoxSessionEntity?
 
+    @Query("SELECT * FROM detox_sessions WHERE (status = 'ACTIVE' OR status = 'PAUSED') ORDER BY startTime DESC LIMIT 1")
+    suspend fun getAnyActiveSessionDirect(): DetoxSessionEntity?
+
     @Query("SELECT * FROM detox_sessions WHERE id = :id LIMIT 1")
     suspend fun getSessionById(id: Long): DetoxSessionEntity?
 

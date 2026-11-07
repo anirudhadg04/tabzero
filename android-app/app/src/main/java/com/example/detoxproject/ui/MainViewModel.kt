@@ -12,6 +12,7 @@ import com.example.detoxproject.data.integrations.health.HealthActivityManager
 import com.example.detoxproject.data.integrations.health.HealthConnectStatus
 import com.example.detoxproject.data.integrations.health.PhysicalActivitySummary
 import com.example.detoxproject.data.integrations.notifications.ActiveDetoxNotificationManager
+import com.example.detoxproject.data.integrations.notifications.DetoxAlarmScheduler
 import com.example.detoxproject.data.integrations.notifications.AlarmState
 import com.example.detoxproject.data.integrations.notifications.SessionAlarmManager
 import com.example.detoxproject.data.integrations.usage.DailyUsageSummary
@@ -215,7 +216,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 packages = packages,
                 title = "Quick Detox",
                 targetMins = active.targetMinutes,
-                startTime = active.startTime
+                startTime = active.startTime,
+                sessionId = active.id
             )
         }
     }
@@ -454,7 +456,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             packages = pkgs,
                             title = session.title,
                             targetMins = session.targetMinutes,
-                            startTime = session.startTime
+                            startTime = session.startTime,
+                            sessionId = session.id
                         )
                     } else {
                         // When paused, stop app blocking but maintain the paused notification
@@ -695,7 +698,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     packages = pkgList,
                     title = title,
                     targetMins = targetMinutes,
-                    startTime = session.startTime
+                    startTime = session.startTime,
+                    sessionId = session.id
                 )
                 _enforcementStatus.value = enforcementManager.getEnforcementStatus()
             } else {
@@ -707,6 +711,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun pauseActiveSession() {
         viewModelScope.launch {
             val active = activeSession.value ?: return@launch
+            DetoxAlarmScheduler.cancelSessionCompletionAlarm(getApplication(), active.id)
             val res = repository.pauseSession(active.id)
             enforcementManager.stopEnforcement()
             _enforcementStatus.value = enforcementManager.getEnforcementStatus()
@@ -723,11 +728,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (res.isSuccess) {
                 val session = res.getOrNull()!!
                 val pkgList = session.restrictedPackages.split(',').map { it.trim() }.filter { it.isNotBlank() }
+                DetoxAlarmScheduler.scheduleSessionCompletionAlarm(getApplication(), session)
                 enforcementManager.startEnforcement(
                     packages = pkgList,
                     title = session.title,
                     targetMins = session.targetMinutes,
-                    startTime = session.startTime
+                    startTime = session.startTime,
+                    sessionId = session.id
                 )
                 _enforcementStatus.value = enforcementManager.getEnforcementStatus()
             } else {
@@ -748,6 +755,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val userId = activeUserId.value ?: 1L
             val active = activeSession.value ?: repository.database.detoxDao().getActiveSessionDirect(userId)
             if (active != null) {
+                DetoxAlarmScheduler.cancelSessionCompletionAlarm(getApplication(), active.id)
                 val res = repository.completeSession(active.id)
                 if (res.isFailure) {
                     _userMessage.value = res.exceptionOrNull()?.message
@@ -769,6 +777,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val userId = activeUserId.value ?: 1L
             val active = activeSession.value ?: repository.database.detoxDao().getActiveSessionDirect(userId)
             if (active != null) {
+                DetoxAlarmScheduler.cancelSessionCompletionAlarm(getApplication(), active.id)
                 val res = repository.cancelSession(active.id)
                 if (res.isFailure) {
                     _userMessage.value = res.exceptionOrNull()?.message

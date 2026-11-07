@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -118,12 +119,26 @@
                 android:resource="@xml/detox_accessibility_service_config" />
         </service>
 
+        <!-- Boot Completed Receiver for Restoring Active Detox Sessions -->
+        <receiver
+            android:name=".data.integrations.enforcement.BootCompletedReceiver"
+            android:exported="true"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
         <!-- Broadcast receiver for dismissing completion alarm from notification drawer or lockscreen -->
         <receiver
             android:name=".data.integrations.notifications.AlarmActionReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.example.detoxproject.ACTION_DISMISS_ALARM" />
+                <action android:name="com.example.detoxproject.ACTION_SESSION_TIMEOUT" />
             </intent-filter>
         </receiver>
     </application>

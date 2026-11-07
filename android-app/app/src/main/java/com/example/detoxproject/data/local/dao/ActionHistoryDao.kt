@@ -36,6 +36,38 @@ interface ActionHistoryDao {
     @Query("SELECT * FROM action_history WHERE userId = :userId ORDER BY sequenceOrder DESC, id DESC LIMIT :limit")
     suspend fun getRecentActionsDirect(userId: Long = 1L, limit: Int = 5): List<ActionHistoryEntity>
 
+    // --- DAILY BOUNDED QUERIES (Current Calendar Day Only) ---
+
+    @Query("SELECT * FROM action_history WHERE userId = :userId AND stackPosition = 'PAST' AND timestamp >= :startOfDay AND timestamp < :endOfDay ORDER BY sequenceOrder DESC")
+    fun getTodayPastActions(userId: Long = 1L, startOfDay: Long, endOfDay: Long): Flow<List<ActionHistoryEntity>>
+
+    @Query("SELECT * FROM action_history WHERE userId = :userId AND stackPosition = 'PAST' AND timestamp >= :startOfDay AND timestamp < :endOfDay ORDER BY sequenceOrder DESC")
+    suspend fun getTodayPastActionsDirect(userId: Long = 1L, startOfDay: Long, endOfDay: Long): List<ActionHistoryEntity>
+
+    @Query("SELECT * FROM action_history WHERE userId = :userId AND stackPosition = 'FUTURE' AND timestamp >= :startOfDay AND timestamp < :endOfDay ORDER BY sequenceOrder ASC")
+    fun getTodayFutureActions(userId: Long = 1L, startOfDay: Long, endOfDay: Long): Flow<List<ActionHistoryEntity>>
+
+    @Query("SELECT * FROM action_history WHERE userId = :userId AND stackPosition = 'FUTURE' AND timestamp >= :startOfDay AND timestamp < :endOfDay ORDER BY sequenceOrder ASC")
+    suspend fun getTodayFutureActionsDirect(userId: Long = 1L, startOfDay: Long, endOfDay: Long): List<ActionHistoryEntity>
+
+    @Query("SELECT * FROM action_history WHERE userId = :userId AND stackPosition = 'PAST' AND timestamp >= :startOfDay AND timestamp < :endOfDay ORDER BY sequenceOrder DESC LIMIT 1")
+    suspend fun getLatestTodayPastAction(userId: Long = 1L, startOfDay: Long, endOfDay: Long): ActionHistoryEntity?
+
+    @Query("SELECT * FROM action_history WHERE userId = :userId AND stackPosition = 'FUTURE' AND timestamp >= :startOfDay AND timestamp < :endOfDay ORDER BY sequenceOrder ASC LIMIT 1")
+    suspend fun getNextTodayFutureAction(userId: Long = 1L, startOfDay: Long, endOfDay: Long): ActionHistoryEntity?
+
+    @Query("SELECT COUNT(*) FROM action_history WHERE userId = :userId AND stackPosition = 'PAST' AND timestamp >= :startOfDay AND timestamp < :endOfDay")
+    fun getTodayPastCount(userId: Long = 1L, startOfDay: Long, endOfDay: Long): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM action_history WHERE userId = :userId AND stackPosition = 'FUTURE' AND timestamp >= :startOfDay AND timestamp < :endOfDay")
+    fun getTodayFutureCount(userId: Long = 1L, startOfDay: Long, endOfDay: Long): Flow<Int>
+
+    @Query("DELETE FROM action_history WHERE userId = :userId AND timestamp < :startOfDay")
+    suspend fun purgePastDaysHistory(startOfDay: Long, userId: Long = 1L)
+
+    @Query("DELETE FROM action_history WHERE userId = :userId AND timestamp >= :startOfDay AND timestamp < :endOfDay AND id IN (SELECT id FROM action_history WHERE userId = :userId AND stackPosition = 'PAST' AND timestamp >= :startOfDay AND timestamp < :endOfDay ORDER BY sequenceOrder ASC LIMIT :excessCount)")
+    suspend fun trimOldestTodayPast(excessCount: Int, startOfDay: Long, endOfDay: Long, userId: Long = 1L)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAction(action: ActionHistoryEntity): Long
 

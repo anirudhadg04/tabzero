@@ -2,13 +2,9 @@ package com.example.detoxproject.data.integrations.enforcement
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.admin.DevicePolicyManager
 import android.content.Context
-import android.content.Intent
 import android.os.Build
-import androidx.core.app.NotificationCompat
-import com.example.detoxproject.MainActivity
 import com.example.detoxproject.data.integrations.usage.UsageStatsHelper
 
 enum class EnforcementCapability {
@@ -74,11 +70,12 @@ class EnforcementManager(private val context: Context) {
         packages: List<String> = restrictedPackageList,
         title: String = "Focus Session",
         targetMins: Int = 25,
-        startTime: Long = System.currentTimeMillis()
+        startTime: Long = System.currentTimeMillis(),
+        sessionId: Long = 0L
     ): Boolean {
         isEnforcementActive = true
         restrictedPackageList = packages
-        DetoxEnforcementService.start(context, packages, title, targetMins, startTime)
+        DetoxEnforcementService.start(context, packages, title, targetMins, startTime, sessionId)
         return true
     }
 

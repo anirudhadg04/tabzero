@@ -10,10 +10,13 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.example.detoxproject.MainActivity
 import com.example.detoxproject.data.integrations.notifications.ActiveDetoxNotificationManager
+import com.example.detoxproject.data.integrations.notifications.DetoxAlarmScheduler
+import com.example.detoxproject.data.integrations.notifications.SessionAlarmManager
 import com.example.detoxproject.data.integrations.usage.UsageStatsHelper
+import com.example.detoxproject.data.local.OfflineDatabase
 import com.example.detoxproject.data.local.entity.DetoxSessionEntity
+import com.example.detoxproject.domain.engine.DetoxTimerEngine
 import com.example.detoxproject.ui.screens.intervention.ZenInterventionActivity
 import kotlinx.coroutines.*
 
@@ -22,6 +25,7 @@ class DetoxEnforcementService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var isMonitoring = false
     private var lastInterventionTimeMs = 0L
+    private var currentSessionId = 0L
 
     companion object {
         const val ACTION_START_MONITORING = "com.example.detoxproject.START_MONITORING"
@@ -30,6 +34,7 @@ class DetoxEnforcementService : Service() {
         const val EXTRA_SESSION_TITLE = "session_title"
         const val EXTRA_TARGET_MINUTES = "target_minutes"
         const val EXTRA_START_TIME = "start_time"
+        const val EXTRA_SESSION_ID = "session_id"
 
         private const val CHANNEL_ID = ActiveDetoxNotificationManager.CHANNEL_ID
         private const val NOTIFICATION_ID = ActiveDetoxNotificationManager.ONGOING_NOTIFICATION_ID
@@ -38,13 +43,21 @@ class DetoxEnforcementService : Service() {
         var isServiceRunning = false
             private set
 
-        fun start(context: Context, packages: List<String>, title: String, targetMins: Int, startTime: Long) {
+        fun start(
+            context: Context,
+            packages: List<String>,
+            title: String,
+            targetMins: Int,
+            startTime: Long,
+            sessionId: Long = 0L
+        ) {
             val intent = Intent(context, DetoxEnforcementService::class.java).apply {
                 action = ACTION_START_MONITORING
                 putStringArrayListExtra(EXTRA_RESTRICTED_PACKAGES, ArrayList(packages))
                 putExtra(EXTRA_SESSION_TITLE, title)
                 putExtra(EXTRA_TARGET_MINUTES, targetMins)
                 putExtra(EXTRA_START_TIME, startTime)
+                putExtra(EXTRA_SESSION_ID, sessionId)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
@@ -73,10 +86,21 @@ class DetoxEnforcementService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
+        if (intent == null) {
+            // Android OS restarted the service after process death (START_STICKY)
+            // Immediately satisfy Android's foreground service start requirement
+            startForeground(NOTIFICATION_ID, buildForegroundNotification())
+            recoverActiveSession()
+            return START_STICKY
+        }
+
+        when (intent.action) {
             ACTION_STOP_MONITORING -> {
                 stopMonitoring()
                 DetoxAccessibilityService.stopDetox()
+                if (currentSessionId != 0L) {
+                    DetoxAlarmScheduler.cancelSessionCompletionAlarm(this, currentSessionId)
+                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     stopForeground(STOP_FOREGROUND_REMOVE)
                 } else {
@@ -94,6 +118,7 @@ class DetoxEnforcementService : Service() {
                 sessionTitle = intent.getStringExtra(EXTRA_SESSION_TITLE) ?: "Focus Session"
                 targetMinutes = intent.getIntExtra(EXTRA_TARGET_MINUTES, 25)
                 startTimeMs = intent.getLongExtra(EXTRA_START_TIME, System.currentTimeMillis())
+                currentSessionId = intent.getLongExtra(EXTRA_SESSION_ID, 0L)
 
                 // Sync with high-reliability Accessibility Service for 0ms latency interception
                 DetoxAccessibilityService.updateRestrictedConfig(
@@ -104,11 +129,114 @@ class DetoxEnforcementService : Service() {
                     startTime = startTimeMs
                 )
 
+                val session = DetoxSessionEntity(
+                    id = currentSessionId,
+                    title = sessionTitle,
+                    targetMinutes = targetMinutes,
+                    startTime = startTimeMs,
+                    status = "ACTIVE",
+                    restrictedPackages = cleanPkgs.joinToString(","),
+                    sessionDate = ""
+                )
+
+                // Schedule exact alarm with AlarmManager
+                if (currentSessionId != 0L) {
+                    DetoxAlarmScheduler.scheduleSessionCompletionAlarm(this, session)
+                }
+
                 startForeground(NOTIFICATION_ID, buildForegroundNotification())
                 startMonitoringLoop()
             }
         }
         return START_STICKY
+    }
+
+    private fun recoverActiveSession() {
+        serviceScope.launch {
+            try {
+                val db = OfflineDatabase.getInstance(this@DetoxEnforcementService)
+                val activeSession = db.detoxDao().getAnyActiveSessionDirect()
+
+                if (activeSession == null || activeSession.status != "ACTIVE") {
+                    // No active session requires enforcement
+                    stopMonitoring()
+                    DetoxAccessibilityService.stopDetox()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        stopForeground(true)
+                    }
+                    stopSelf()
+                    isServiceRunning = false
+                    return@launch
+                }
+
+                val now = System.currentTimeMillis()
+                val remainingMs = DetoxTimerEngine.calculateRemainingMs(activeSession, now)
+
+                if (remainingMs <= 0L) {
+                    // Session expired while process was dead: mark COMPLETED safely
+                    val completed = activeSession.copy(
+                        status = "COMPLETED",
+                        actualMinutes = activeSession.targetMinutes,
+                        endTime = DetoxTimerEngine.calculateExpectedEndTimeMs(activeSession)
+                    )
+                    db.detoxDao().updateSession(completed)
+
+                    ActiveDetoxNotificationManager.cancelNotification(this@DetoxEnforcementService)
+                    SessionAlarmManager.triggerAlarm(
+                        context = this@DetoxEnforcementService,
+                        sessionId = activeSession.id,
+                        sessionTitle = activeSession.title,
+                        durationMinutes = activeSession.targetMinutes
+                    )
+
+                    stopMonitoring()
+                    DetoxAccessibilityService.stopDetox()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        stopForeground(true)
+                    }
+                    stopSelf()
+                    isServiceRunning = false
+                    return@launch
+                }
+
+                // Restore active session state
+                currentSessionId = activeSession.id
+                sessionTitle = activeSession.title.ifBlank { "Focus Session" }
+                targetMinutes = activeSession.targetMinutes
+                startTimeMs = activeSession.startTime
+                val cleanPkgs = activeSession.restrictedPackages.split(',')
+                    .map { it.trim().lowercase() }
+                    .filter { it.isNotBlank() }
+                restrictedPackages = cleanPkgs.toSet()
+
+                // Sync with Accessibility Service
+                DetoxAccessibilityService.updateRestrictedConfig(
+                    active = true,
+                    packages = restrictedPackages,
+                    title = sessionTitle,
+                    targetMins = targetMinutes,
+                    startTime = startTimeMs
+                )
+
+                // Re-schedule exact alarm with AlarmManager
+                DetoxAlarmScheduler.scheduleSessionCompletionAlarm(this@DetoxEnforcementService, activeSession)
+
+                // Update notification with accurate countdown chronometer
+                val notification = ActiveDetoxNotificationManager.buildNotification(this@DetoxEnforcementService, activeSession)
+                val manager = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+                manager?.notify(NOTIFICATION_ID, notification)
+
+                startMonitoringLoop()
+            } catch (e: Exception) {
+                // Safeguard against DB or OS exceptions
+            }
+        }
     }
 
     private fun startMonitoringLoop() {
@@ -249,6 +377,7 @@ class DetoxEnforcementService : Service() {
 
     private fun buildForegroundNotification(): Notification {
         val session = DetoxSessionEntity(
+            id = currentSessionId,
             title = sessionTitle,
             targetMinutes = targetMinutes,
             startTime = startTimeMs,
