@@ -20,49 +20,54 @@ fun MinimalBottomNav(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(68.dp),
+        modifier = modifier.fillMaxWidth(),
         color = OfflineSurface,
         shadowElevation = 0.dp
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
+                .navigationBarsPadding()
         ) {
-            bottomNavScreens.forEach { screen ->
-                val isSelected = currentRoute == screen.route
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                bottomNavScreens.forEach { screen ->
+                    val isSelected = currentRoute == screen.route
 
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clickable { onNavigate(screen) },
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = if (isSelected) screen.activeIcon else screen.icon,
-                        contentDescription = screen.title,
-                        tint = if (isSelected) OfflineTextPrimary else OfflineTextMuted.copy(alpha = 0.6f),
-                        modifier = Modifier.size(22.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    // Minimalist active dot below icon (as seen in Reference Image 1)
-                    if (isSelected) {
-                        Box(
-                            modifier = Modifier
-                                .size(4.dp)
-                                .clip(CircleShape)
-                                .background(OfflineTextPrimary)
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable { onNavigate(screen) },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = if (isSelected) screen.activeIcon else screen.icon,
+                            contentDescription = screen.title,
+                            tint = if (isSelected) OfflineTextPrimary else OfflineTextMuted.copy(alpha = 0.6f),
+                            modifier = Modifier.size(22.dp)
                         )
-                    } else {
-                        Spacer(modifier = Modifier.size(4.dp))
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // Minimalist active dot below icon
+                        if (isSelected) {
+                            Box(
+                                modifier = Modifier
+                                    .size(4.dp)
+                                    .clip(CircleShape)
+                                    .background(OfflineTextPrimary)
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.size(4.dp))
+                        }
                     }
                 }
             }

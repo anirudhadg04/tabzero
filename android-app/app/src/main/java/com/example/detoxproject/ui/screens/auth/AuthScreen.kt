@@ -3,6 +3,7 @@ package com.example.detoxproject.ui.screens.auth
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -27,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.detoxproject.R
@@ -48,6 +48,8 @@ fun AuthScreen(
     onGetSecurityQuestion: (email: String, onResult: (Boolean, String, String, String?) -> Unit) -> Unit = { _, _ -> },
     onVerifySecurityAnswer: (email: String, questionKey: String, answer: String, onResult: (Boolean, String?) -> Unit) -> Unit = { _, _, _, _ -> }
 ) {
+    val isDark = ThemeManager.isDark()
+
     var isSignUp by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -82,6 +84,26 @@ fun AuthScreen(
 
     val scrollState = rememberScrollState()
 
+    // Unified high-contrast text field styling for dark and light modes
+    val authTextFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedContainerColor = if (isDark) Color(0xFF161B22) else Color(0xFFFFFFFF),
+        unfocusedContainerColor = if (isDark) Color(0xFF161B22) else Color(0xFFF8FAFC),
+        disabledContainerColor = if (isDark) Color(0xFF12161D) else Color(0xFFF1F5F9),
+        focusedTextColor = if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827),
+        unfocusedTextColor = if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827),
+        focusedLabelColor = if (isDark) OfflineAccentCyan else Color(0xFF111827),
+        unfocusedLabelColor = if (isDark) Color(0xFF8B949E) else Color(0xFF6B7280),
+        focusedBorderColor = if (isDark) OfflineAccentCyan else Color(0xFF111827),
+        unfocusedBorderColor = if (isDark) Color(0xFF30363D) else Color(0xFFE2E8F0),
+        cursorColor = if (isDark) OfflineAccentCyan else Color(0xFF111827),
+        focusedTrailingIconColor = if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827),
+        unfocusedTrailingIconColor = if (isDark) Color(0xFF8B949E) else Color(0xFF6B7280),
+        focusedPlaceholderColor = if (isDark) Color(0xFF6E7681) else Color(0xFF9CA3AF),
+        unfocusedPlaceholderColor = if (isDark) Color(0xFF6E7681) else Color(0xFF9CA3AF),
+        errorBorderColor = MaterialTheme.colorScheme.error,
+        errorTextColor = if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827)
+    )
+
     if (showForgotPasswordDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -89,12 +111,15 @@ fun AuthScreen(
                 recoveryStep = ForgotPasswordStep.ENTER_EMAIL
                 recoveryError = null
             },
+            containerColor = if (isDark) Color(0xFF161B22) else Color.White,
+            titleContentColor = if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827),
+            textContentColor = if (isDark) Color(0xFFC9D1D9) else Color(0xFF4B5563),
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = if (recoveryStep == ForgotPasswordStep.SUCCESS) Icons.Default.CheckCircle else Icons.Default.LockReset,
                         contentDescription = null,
-                        tint = if (recoveryStep == ForgotPasswordStep.SUCCESS) Color(0xFF16A34A) else OfflineAccentPrimary,
+                        tint = if (recoveryStep == ForgotPasswordStep.SUCCESS) Color(0xFF16A34A) else (if (isDark) OfflineAccentCyan else OfflineAccentPrimary),
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -106,7 +131,7 @@ fun AuthScreen(
                             ForgotPasswordStep.SUCCESS -> "Password Updated"
                         },
                         style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = OfflineTextPrimary
+                        color = if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827)
                     )
                 }
             },
@@ -117,7 +142,7 @@ fun AuthScreen(
                             Text(
                                 text = "Enter your registered email to begin account verification.",
                                 style = Typography.bodySmall,
-                                color = OfflineTextSecondary
+                                color = if (isDark) Color(0xFF8B949E) else Color(0xFF6B7280)
                             )
                             Spacer(modifier = Modifier.height(14.dp))
                             OutlinedTextField(
@@ -130,15 +155,16 @@ fun AuthScreen(
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(12.dp),
+                                colors = authTextFieldColors
                             )
                         }
 
                         ForgotPasswordStep.ANSWER_QUESTION -> {
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = SoftBlue.copy(alpha = 0.5f),
-                                border = BorderStroke(1.dp, OfflineBorder),
+                                color = if (isDark) Color(0xFF21262D) else SoftBlueLight.copy(alpha = 0.7f),
+                                border = BorderStroke(1.dp, if (isDark) Color(0xFF30363D) else Color(0xFFE2E8F0)),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
@@ -146,21 +172,21 @@ fun AuthScreen(
                                         Icon(
                                             imageVector = Icons.Default.Security,
                                             contentDescription = null,
-                                            tint = OfflineAccentPrimary,
+                                            tint = if (isDark) OfflineAccentCyan else OfflineAccentPrimary,
                                             modifier = Modifier.size(16.dp)
                                         )
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Text(
                                             text = "SECURITY QUESTION",
                                             style = Typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                            color = OfflineAccentPrimary
+                                            color = if (isDark) OfflineAccentCyan else OfflineAccentPrimary
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = recoveryQuestionText,
                                         style = Typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                        color = OfflineTextPrimary
+                                        color = if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827)
                                     )
                                 }
                             }
@@ -182,7 +208,7 @@ fun AuthScreen(
                                 Text(
                                     text = if (recoverySecurityKey == "DAILY_STEPS") "Switch to Daily Offline Goal question" else "Switch to Daily Step Goal question",
                                     fontSize = 11.sp,
-                                    color = OfflineAccentPrimary
+                                    color = if (isDark) OfflineAccentCyan else OfflineAccentPrimary
                                 )
                             }
 
@@ -199,7 +225,8 @@ fun AuthScreen(
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(12.dp),
+                                colors = authTextFieldColors
                             )
                         }
 
@@ -207,7 +234,7 @@ fun AuthScreen(
                             Text(
                                 text = "Security answer verified! Please choose a new password with at least 6 characters.",
                                 style = Typography.bodySmall,
-                                color = OfflineTextSecondary
+                                color = if (isDark) Color(0xFF8B949E) else Color(0xFF6B7280)
                             )
                             Spacer(modifier = Modifier.height(14.dp))
                             OutlinedTextField(
@@ -223,11 +250,16 @@ fun AuthScreen(
                                 trailingIcon = {
                                     val icon = if (recoveryPassVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
                                     IconButton(onClick = { recoveryPassVisible = !recoveryPassVisible }) {
-                                        Icon(imageVector = icon, contentDescription = "Toggle visibility")
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = "Toggle visibility",
+                                            tint = if (isDark) Color(0xFFC9D1D9) else Color(0xFF6B7280)
+                                        )
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(12.dp),
+                                colors = authTextFieldColors
                             )
                             Spacer(modifier = Modifier.height(10.dp))
                             OutlinedTextField(
@@ -241,7 +273,8 @@ fun AuthScreen(
                                 visualTransformation = if (recoveryPassVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(12.dp),
+                                colors = authTextFieldColors
                             )
                         }
 
@@ -249,7 +282,7 @@ fun AuthScreen(
                             Text(
                                 text = "Your password has been changed successfully. You can now log into your tabzero. account.",
                                 style = Typography.bodyMedium,
-                                color = OfflineTextPrimary
+                                color = if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827)
                             )
                         }
                     }
@@ -259,12 +292,14 @@ fun AuthScreen(
                         Text(
                             text = recoveryError!!,
                             style = Typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
+                            color = if (isDark) Color(0xFFFF7B72) else MaterialTheme.colorScheme.error
                         )
                     }
                 }
             },
             confirmButton = {
+                val buttonBg = if (isDark) Color(0xFFF0F6FC) else Color(0xFF18181B)
+                val buttonContent = if (isDark) Color(0xFF0F172A) else Color.White
                 when (recoveryStep) {
                     ForgotPasswordStep.ENTER_EMAIL -> {
                         Button(
@@ -285,10 +320,13 @@ fun AuthScreen(
                                     }
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = OfflineDarkButton),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = buttonBg,
+                                contentColor = buttonContent
+                            ),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Next", color = OfflineOnDarkButton)
+                            Text("Next", color = buttonContent)
                         }
                     }
 
@@ -309,10 +347,13 @@ fun AuthScreen(
                                     }
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = OfflineDarkButton),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = buttonBg,
+                                contentColor = buttonContent
+                            ),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Verify Answer", color = OfflineOnDarkButton)
+                            Text("Verify Answer", color = buttonContent)
                         }
                     }
 
@@ -339,10 +380,13 @@ fun AuthScreen(
                                     }
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = OfflineDarkButton),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = buttonBg,
+                                contentColor = buttonContent
+                            ),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Change Password", color = OfflineOnDarkButton)
+                            Text("Change Password", color = buttonContent)
                         }
                     }
 
@@ -352,10 +396,13 @@ fun AuthScreen(
                                 showForgotPasswordDialog = false
                                 recoveryStep = ForgotPasswordStep.ENTER_EMAIL
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = OfflineDarkButton),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = buttonBg,
+                                contentColor = buttonContent
+                            ),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Back to Sign In", color = OfflineOnDarkButton)
+                            Text("Back to Sign In", color = buttonContent)
                         }
                     }
                 }
@@ -372,7 +419,10 @@ fun AuthScreen(
                         }
                         recoveryError = null
                     }) {
-                        Text(if (recoveryStep == ForgotPasswordStep.ENTER_EMAIL) "Cancel" else "Back", color = OfflineTextPrimary)
+                        Text(
+                            text = if (recoveryStep == ForgotPasswordStep.ENTER_EMAIL) "Cancel" else "Back",
+                            color = if (isDark) Color(0xFF8B949E) else Color(0xFF6B7280)
+                        )
                     }
                 }
             }
@@ -382,19 +432,26 @@ fun AuthScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(OfflineBackground)
+            .background(if (isDark) OfflineBackgroundDark else OfflineBackgroundLight)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
             .verticalScroll(scrollState)
-            .padding(horizontal = 28.dp, vertical = 24.dp),
+            .padding(horizontal = 28.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Official tabzero. Logo Emblem
+        // Official tabzero. Logo Emblem with subtle dark/light container border
         Box(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .background(Color.White),
+                .background(Color.White)
+                .border(
+                    BorderStroke(1.5.dp, if (isDark) Color(0xFF30363D) else Color(0xFFE2E8F0)),
+                    CircleShape
+                ),
             contentAlignment = Alignment.Center
         ) {
             Image(
@@ -413,7 +470,7 @@ fun AuthScreen(
                 letterSpacing = (-0.5).sp,
                 fontSize = 32.sp
             ),
-            color = OfflineTextPrimary
+            color = if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827)
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -421,26 +478,36 @@ fun AuthScreen(
         Text(
             text = "Life happens beyond the screen.",
             style = Typography.bodyMedium,
-            color = OfflineTextSecondary
+            color = if (isDark) Color(0xFF8B949E) else Color(0xFF6B7280)
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
-        // Tab Selector (Sign In vs Create Account)
+        // Tab Selector (Sign In vs Create Account) with high-contrast active pill in both modes
+        val tabTrackBg = if (isDark) Color(0xFF161B22) else Color(0xFFF1F5F9)
+        val tabTrackBorder = if (isDark) Color(0xFF30363D) else Color(0xFFE2E8F0)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(44.dp)
-                .clip(RoundedCornerShape(22.dp))
-                .background(OfflineSurfaceVariant.copy(alpha = 0.5f))
-                .padding(4.dp)
+                .height(46.dp)
+                .clip(RoundedCornerShape(23.dp))
+                .background(tabTrackBg)
+                .border(BorderStroke(1.dp, tabTrackBorder), RoundedCornerShape(23.dp))
+                .padding(3.dp)
         ) {
+            val isSignInActive = !isSignUp
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(if (!isSignUp) Color.White else Color.Transparent)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        if (isSignInActive) {
+                            if (isDark) Color(0xFFF0F6FC) else Color.White
+                        } else {
+                            Color.Transparent
+                        }
+                    )
                     .clickable {
                         isSignUp = false
                         errorMessage = null
@@ -449,17 +516,30 @@ fun AuthScreen(
             ) {
                 Text(
                     text = "Sign In",
-                    style = Typography.titleSmall.copy(fontWeight = if (!isSignUp) FontWeight.SemiBold else FontWeight.Normal),
-                    color = if (!isSignUp) OfflineTextPrimary else OfflineTextMuted
+                    style = Typography.titleSmall.copy(
+                        fontWeight = if (isSignInActive) FontWeight.Bold else FontWeight.Medium
+                    ),
+                    color = if (isSignInActive) {
+                        if (isDark) Color(0xFF0F172A) else Color(0xFF111827)
+                    } else {
+                        if (isDark) Color(0xFF8B949E) else Color(0xFF6B7280)
+                    }
                 )
             }
 
+            val isCreateActive = isSignUp
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(if (isSignUp) Color.White else Color.Transparent)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        if (isCreateActive) {
+                            if (isDark) Color(0xFFF0F6FC) else Color.White
+                        } else {
+                            Color.Transparent
+                        }
+                    )
                     .clickable {
                         isSignUp = true
                         errorMessage = null
@@ -468,13 +548,19 @@ fun AuthScreen(
             ) {
                 Text(
                     text = "Create Account",
-                    style = Typography.titleSmall.copy(fontWeight = if (isSignUp) FontWeight.SemiBold else FontWeight.Normal),
-                    color = if (isSignUp) OfflineTextPrimary else OfflineTextMuted
+                    style = Typography.titleSmall.copy(
+                        fontWeight = if (isCreateActive) FontWeight.Bold else FontWeight.Medium
+                    ),
+                    color = if (isCreateActive) {
+                        if (isDark) Color(0xFF0F172A) else Color(0xFF111827)
+                    } else {
+                        if (isDark) Color(0xFF8B949E) else Color(0xFF6B7280)
+                    }
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(26.dp))
 
         // Sign Up Only: Full Name Field
         if (isSignUp) {
@@ -484,7 +570,8 @@ fun AuthScreen(
                 label = { Text("Full Name") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = authTextFieldColors
             )
             Spacer(modifier = Modifier.height(14.dp))
         }
@@ -497,12 +584,13 @@ fun AuthScreen(
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp)
+            shape = RoundedCornerShape(14.dp),
+            colors = authTextFieldColors
         )
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Password Field
+        // Password Field with clear visibility icon contrast
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -513,15 +601,20 @@ fun AuthScreen(
             trailingIcon = {
                 val icon = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = icon, contentDescription = "Toggle password visibility")
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "Toggle password visibility",
+                        tint = if (isDark) Color(0xFFC9D1D9) else Color(0xFF6B7280)
+                    )
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp)
+            shape = RoundedCornerShape(14.dp),
+            colors = authTextFieldColors
         )
 
         if (!isSignUp) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
@@ -537,13 +630,13 @@ fun AuthScreen(
                     Text(
                         text = "Forgot password?",
                         style = Typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = OfflineTextSecondary
+                        color = if (isDark) OfflineAccentCyan else Color(0xFF4B5563)
                     )
                 }
             }
         }
 
-        // Sign Up Only: Confirm Password Field
+        // Sign Up Only: Confirm Password Field & Terms
         if (isSignUp) {
             Spacer(modifier = Modifier.height(14.dp))
             OutlinedTextField(
@@ -554,7 +647,8 @@ fun AuthScreen(
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = authTextFieldColors
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -563,7 +657,7 @@ fun AuthScreen(
             Text(
                 text = "Terms and Conditions",
                 style = Typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = OfflineTextPrimary,
+                color = if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -575,8 +669,15 @@ fun AuthScreen(
                     .fillMaxWidth()
                     .height(130.dp),
                 shape = RoundedCornerShape(12.dp),
-                color = OfflineSurfaceVariant.copy(alpha = 0.5f),
-                border = BorderStroke(1.dp, if (hasScrolledTermsToEnd) OfflineBorder else OfflineAccentPrimary.copy(alpha = 0.4f))
+                color = if (isDark) Color(0xFF161B22) else Color(0xFFF8FAFC),
+                border = BorderStroke(
+                    1.dp,
+                    if (hasScrolledTermsToEnd) {
+                        if (isDark) Color(0xFF30363D) else Color(0xFFE2E8F0)
+                    } else {
+                        if (isDark) OfflineAccentCyan.copy(alpha = 0.6f) else OfflineAccentPrimary
+                    }
+                )
             ) {
                 Box(
                     modifier = Modifier
@@ -604,7 +705,7 @@ fun AuthScreen(
                             tabzero. reserves the right to update features, interface designs, and privacy practices to improve your digital wellness experience.
                         """.trimIndent(),
                         style = Typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 16.sp),
-                        color = OfflineTextSecondary
+                        color = if (isDark) Color(0xFFC9D1D9) else Color(0xFF4B5563)
                     )
                 }
             }
@@ -616,7 +717,7 @@ fun AuthScreen(
                 Text(
                     text = "↓ Please scroll to the bottom of the terms to accept",
                     style = Typography.labelSmall.copy(fontSize = 11.sp),
-                    color = OfflineTextMuted,
+                    color = if (isDark) OfflineAccentCyan else Color(0xFF6B7280),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -639,33 +740,52 @@ fun AuthScreen(
                     onCheckedChange = { if (hasScrolledTermsToEnd) termsAccepted = it },
                     enabled = hasScrolledTermsToEnd,
                     colors = CheckboxDefaults.colors(
-                        checkedColor = OfflineAccentPrimary,
-                        uncheckedColor = if (hasScrolledTermsToEnd) OfflineTextSecondary else OfflineBorder,
-                        disabledCheckedColor = OfflineAccentPrimary.copy(alpha = 0.5f),
-                        disabledUncheckedColor = OfflineBorder.copy(alpha = 0.4f)
+                        checkedColor = if (isDark) OfflineAccentCyan else Color(0xFF18181B),
+                        checkmarkColor = if (isDark) Color(0xFF0F172A) else Color.White,
+                        uncheckedColor = if (hasScrolledTermsToEnd) {
+                            if (isDark) Color(0xFF8B949E) else Color(0xFF6B7280)
+                        } else {
+                            if (isDark) Color(0xFF30363D) else Color(0xFFCBD5E1)
+                        },
+                        disabledCheckedColor = (if (isDark) OfflineAccentCyan else Color(0xFF18181B)).copy(alpha = 0.5f),
+                        disabledUncheckedColor = if (isDark) Color(0xFF21262D) else Color(0xFFE2E8F0)
                     )
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "I have read and agree to the Terms and Conditions",
                     style = Typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                    color = if (hasScrolledTermsToEnd) OfflineTextPrimary else OfflineTextMuted
+                    color = if (hasScrolledTermsToEnd) {
+                        if (isDark) Color(0xFFF0F6FC) else Color(0xFF111827)
+                    } else {
+                        if (isDark) Color(0xFF6E7681) else Color(0xFF94A3B8)
+                    }
                 )
             }
         }
 
+        // Error message banner
         if (errorMessage != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = errorMessage!!,
-                style = Typography.bodySmall,
-                color = MaterialTheme.colorScheme.error
-            )
+            Spacer(modifier = Modifier.height(14.dp))
+            Surface(
+                color = if (isDark) Color(0xFF381C20) else Color(0xFFFEE2E2),
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, if (isDark) Color(0xFFF85149).copy(alpha = 0.6f) else Color(0xFFFCA5A5)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = errorMessage!!,
+                    style = Typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                    color = if (isDark) Color(0xFFFF7B72) else Color(0xFFB91C1C),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(26.dp))
 
-        // Main Submit Pill Button
+        // Main Submit Pill Button with clear enabled/disabled dark/light styling
+        val isActionEnabled = !isSignUp || (hasScrolledTermsToEnd && termsAccepted)
         Button(
             onClick = {
                 errorMessage = null
@@ -699,17 +819,21 @@ fun AuthScreen(
                     onLogin(email, password)
                 }
             },
-            enabled = !isSignUp || (hasScrolledTermsToEnd && termsAccepted),
-            colors = ButtonDefaults.buttonColors(containerColor = OfflineDarkButton),
+            enabled = isActionEnabled,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isDark) Color(0xFFF0F6FC) else Color(0xFF18181B),
+                contentColor = if (isDark) Color(0xFF0F172A) else Color.White,
+                disabledContainerColor = if (isDark) Color(0xFF21262D) else Color(0xFFE2E8F0),
+                disabledContentColor = if (isDark) Color(0xFF6E7681) else Color(0xFF94A3B8)
+            ),
             shape = RoundedCornerShape(24.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
         ) {
             Text(
-                text = if (isSignUp) "create account" else "sign in",
-                style = Typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-                color = OfflineOnDarkButton
+                text = if (isSignUp) "Create Account" else "Sign In",
+                style = Typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
             )
         }
 

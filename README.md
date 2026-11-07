@@ -162,12 +162,14 @@ The Android application is distributed through GitHub Releases.
 - **Minimum Android Version:** Android 8.0 Oreo (API 26)
 - **Package Size:** Approximately 4.54 MB (4,756,318 bytes)
 - **Signing Scheme:** Privately release-signed APK (v2 signature scheme verified).
-- **SHA-256:** `6e7e7e33a32431630f2e000b51f9bceea44a10a896ad2cf0f17ef8decaf0e78c`
+- **SHA-256:** `373b2ca4083ddb44bf53c83360a74a178d02fc4515c739357c137f8d78c478d2`
 
 #### What's New in v1.0.2
 - **Reboot & Process-Death Recovery:** Active Digital Detox sessions seamlessly survive OS background kills and device restarts without resetting timers or duplicating alarms.
 - **Boot Completed Integration:** Restores alarms, notifications, and restricted app enforcement automatically on device boot (`RECEIVE_BOOT_COMPLETED`).
 - **Offline Privacy Transparency:** Added dedicated Settings Privacy Guide `(?)` and granular permission explanation dialogs confirming 100% on-device processing.
+- **Dark Mode Authentication Polish:** High-contrast active tab pills, elevated dark input field cards, legible placeholders, bright visibility toggles, and styled recovery dialogs.
+- **Android Navigation Inset Fix:** Full system inset handling for 3-button and gesture navigation, eliminating overlap with the bottom navigation bar.
 - **Daily Undo/Redo Boundary:** Undo/redo operations reset daily for optimal performance while safely preserving complete historical records.
 - **About Tabzero:** Added comprehensive About card in Settings explaining mindful architecture and local privacy guarantees.
 
